@@ -1,0 +1,71 @@
+#version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: protein_db
+    environment:
+      POSTGRES_DB: protein_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  web:
+    build:
+      context: ./web/BE
+      dockerfile: Dockerfile
+    container_name: protein_web
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - GIN_MODE=debug
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=password
+      - DB_DATABASE=protein_db
+      - DB_SSL_MODE=disable
+      - ML_BASE_URL=http://ml_service:5000
+      - ML_TIMEOUT=30
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ml_service:
+    image: python:3.11-slim
+    container_name: protein_ml
+    working_dir: /app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./ml:/app
+    command: |
+      sh -c "
+        pip install flask numpy scipy scikit-learn biopython requests &&
+        python app.py
+      "
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: protein_network
