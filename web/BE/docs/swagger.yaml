@@ -1,4 +1,87 @@
 basePath: /
+definitions:
+  handlers.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  handlers.SuccessResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+  usecases.ComparisonRequest:
+    properties:
+      protein_id_1:
+        type: string
+      protein_id_2:
+        type: string
+    required:
+    - protein_id_1
+    - protein_id_2
+    type: object
+  usecases.ProteinCreateRequest:
+    properties:
+      cc:
+        type: string
+      domain:
+        type: string
+      family:
+        type: string
+      function:
+        type: string
+      gene:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      seq:
+        items:
+          type: string
+        type: array
+      taxo:
+        type: string
+    required:
+    - id
+    - name
+    - seq
+    type: object
+  usecases.ProteinUpdateRequest:
+    properties:
+      cc:
+        type: string
+      domain:
+        type: string
+      family:
+        type: string
+      function:
+        type: string
+      gene:
+        type: string
+      name:
+        type: string
+      seq:
+        items:
+          type: string
+        type: array
+      taxo:
+        type: string
+    type: object
+  usecases.SequenceAnalysisRequest:
+    properties:
+      sequence:
+        items:
+          type: string
+        type: array
+    required:
+    - sequence
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -12,7 +95,312 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Protein Analysis API
   version: "1.0"
-paths: {}
+paths:
+  /api/v1/proteins:
+    get:
+      consumes:
+      - application/json
+      description: Search for proteins based on various filters like name, gene, family,
+        etc.
+      parameters:
+      - description: Protein ID
+        in: query
+        name: id
+        type: string
+      - description: Protein name
+        in: query
+        name: name
+        type: string
+      - description: Gene name
+        in: query
+        name: gene
+        type: string
+      - description: Protein family
+        in: query
+        name: family
+        type: string
+      - default: 10
+        description: Limit results
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      - description: Order by field
+        in: query
+        name: order_by
+        type: string
+      - default: ASC
+        description: Order direction (ASC/DESC)
+        in: query
+        name: order_direction
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Search proteins with filters
+      tags:
+      - proteins
+    post:
+      consumes:
+      - application/json
+      description: Create a new protein entry
+      parameters:
+      - description: Protein data
+        in: body
+        name: protein
+        required: true
+        schema:
+          $ref: '#/definitions/usecases.ProteinCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Create a new protein
+      tags:
+      - proteins
+  /api/v1/proteins/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a protein by ID
+      parameters:
+      - description: Protein ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Delete a protein
+      tags:
+      - proteins
+    get:
+      consumes:
+      - application/json
+      description: Get a specific protein by its ID
+      parameters:
+      - description: Protein ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get protein by ID
+      tags:
+      - proteins
+    put:
+      consumes:
+      - application/json
+      description: Update an existing protein by ID
+      parameters:
+      - description: Protein ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated protein data
+        in: body
+        name: protein
+        required: true
+        schema:
+          $ref: '#/definitions/usecases.ProteinUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Update a protein
+      tags:
+      - proteins
+  /api/v1/proteins/analyze:
+    post:
+      consumes:
+      - application/json
+      description: Analyze a protein sequence for various properties
+      parameters:
+      - description: Sequence analysis request
+        in: body
+        name: analysis
+        required: true
+        schema:
+          $ref: '#/definitions/usecases.SequenceAnalysisRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Analyze protein sequence
+      tags:
+      - proteins
+  /api/v1/proteins/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Create multiple proteins in a single request
+      parameters:
+      - description: Array of protein data
+        in: body
+        name: proteins
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/usecases.ProteinCreateRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Bulk create proteins
+      tags:
+      - proteins
+  /api/v1/proteins/compare:
+    post:
+      consumes:
+      - application/json
+      description: Compare multiple proteins for analysis
+      parameters:
+      - description: Comparison request
+        in: body
+        name: comparison
+        required: true
+        schema:
+          $ref: '#/definitions/usecases.ComparisonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Compare proteins
+      tags:
+      - proteins
+  /api/v1/proteins/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get statistical information about proteins in the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get protein statistics
+      tags:
+      - proteins
 securityDefinitions:
   BasicAuth:
     type: basic

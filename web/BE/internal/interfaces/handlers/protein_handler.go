@@ -45,6 +45,23 @@ func (h *ProteinHandler) handleSuccess(c *gin.Context, data interface{}, message
 	})
 }
 
+// SearchProteins godoc
+// @Summary Search proteins with filters
+// @Description Search for proteins based on various filters like name, gene, family, etc.
+// @Tags proteins
+// @Accept json
+// @Produce json
+// @Param id query string false "Protein ID"
+// @Param name query string false "Protein name"
+// @Param gene query string false "Gene name"
+// @Param family query string false "Protein family"
+// @Param limit query int false "Limit results" default(10)
+// @Param offset query int false "Offset for pagination" default(0)
+// @Param order_by query string false "Order by field"
+// @Param order_direction query string false "Order direction (ASC/DESC)" default(ASC)
+// @Success 200 {object} SuccessResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/proteins [get]
 func (h *ProteinHandler) SearchProteins(c *gin.Context) {
 	filter := &entities.ProteinFilter{}
 
@@ -91,6 +108,18 @@ func (h *ProteinHandler) SearchProteins(c *gin.Context) {
 	h.handleSuccess(c, response, "Proteins retrieved successfully")
 }
 
+// GetProteinByID godoc
+// @Summary Get protein by ID
+// @Description Get a specific protein by its ID
+// @Tags proteins
+// @Accept json
+// @Produce json
+// @Param id path string true "Protein ID"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/proteins/{id} [get]
 func (h *ProteinHandler) GetProteinByID(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -111,6 +140,18 @@ func (h *ProteinHandler) GetProteinByID(c *gin.Context) {
 	h.handleSuccess(c, protein, "Protein retrieved successfully")
 }
 
+// CompareProteins godoc
+// @Summary Compare proteins
+// @Description Compare multiple proteins for analysis
+// @Tags proteins
+// @Accept json
+// @Produce json
+// @Param comparison body usecases.ComparisonRequest true "Comparison request"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/proteins/compare [post]
 func (h *ProteinHandler) CompareProteins(c *gin.Context) {
 	var req usecases.ComparisonRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -131,6 +172,17 @@ func (h *ProteinHandler) CompareProteins(c *gin.Context) {
 	h.handleSuccess(c, response, "Proteins compared successfully")
 }
 
+// AnalyzeSequence godoc
+// @Summary Analyze protein sequence
+// @Description Analyze a protein sequence for various properties
+// @Tags proteins
+// @Accept json
+// @Produce json
+// @Param analysis body usecases.SequenceAnalysisRequest true "Sequence analysis request"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/proteins/analyze [post]
 func (h *ProteinHandler) AnalyzeSequence(c *gin.Context) {
 	var req usecases.SequenceAnalysisRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -147,6 +199,18 @@ func (h *ProteinHandler) AnalyzeSequence(c *gin.Context) {
 	h.handleSuccess(c, response, "Sequence analyzed successfully")
 }
 
+// CreateProtein godoc
+// @Summary Create a new protein
+// @Description Create a new protein entry
+// @Tags proteins
+// @Accept json
+// @Produce json
+// @Param protein body usecases.ProteinCreateRequest true "Protein data"
+// @Success 201 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 409 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/proteins [post]
 func (h *ProteinHandler) CreateProtein(c *gin.Context) {
 	var req usecases.ProteinCreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -168,6 +232,19 @@ func (h *ProteinHandler) CreateProtein(c *gin.Context) {
 	})
 }
 
+// UpdateProtein godoc
+// @Summary Update a protein
+// @Description Update an existing protein by ID
+// @Tags proteins
+// @Accept json
+// @Produce json
+// @Param id path string true "Protein ID"
+// @Param protein body usecases.ProteinUpdateRequest true "Updated protein data"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/proteins/{id} [put]
 func (h *ProteinHandler) UpdateProtein(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -193,6 +270,18 @@ func (h *ProteinHandler) UpdateProtein(c *gin.Context) {
 	h.handleSuccess(c, nil, "Protein updated successfully")
 }
 
+// DeleteProtein godoc
+// @Summary Delete a protein
+// @Description Delete a protein by ID
+// @Tags proteins
+// @Accept json
+// @Produce json
+// @Param id path string true "Protein ID"
+// @Success 204
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/proteins/{id} [delete]
 func (h *ProteinHandler) DeleteProtein(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -212,6 +301,15 @@ func (h *ProteinHandler) DeleteProtein(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+// GetProteinStats godoc
+// @Summary Get protein statistics
+// @Description Get statistical information about proteins in the database
+// @Tags proteins
+// @Accept json
+// @Produce json
+// @Success 200 {object} SuccessResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/proteins/stats [get]
 func (h *ProteinHandler) GetProteinStats(c *gin.Context) {
 	stats, err := h.proteinUseCases.GetProteinStats(c.Request.Context())
 	if err != nil {
@@ -222,6 +320,17 @@ func (h *ProteinHandler) GetProteinStats(c *gin.Context) {
 	h.handleSuccess(c, stats, "Protein statistics retrieved successfully")
 }
 
+// BulkCreateProteins godoc
+// @Summary Bulk create proteins
+// @Description Create multiple proteins in a single request
+// @Tags proteins
+// @Accept json
+// @Produce json
+// @Param proteins body []usecases.ProteinCreateRequest true "Array of protein data"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/proteins/bulk [post]
 func (h *ProteinHandler) BulkCreateProteins(c *gin.Context) {
 	var requests []*usecases.ProteinCreateRequest
 	if err := c.ShouldBindJSON(&requests); err != nil {

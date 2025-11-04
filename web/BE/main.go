@@ -27,10 +27,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "go-crawler/web/BE/docs"
 	"go-crawler/web/BE/internal/api"
 	"go-crawler/web/BE/internal/domain/services"
@@ -39,29 +35,19 @@ import (
 	"go-crawler/web/BE/internal/infrastructure/database"
 	"go-crawler/web/BE/internal/interfaces/handlers"
 	"go-crawler/web/BE/internal/usecases"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
 	// Load configuration
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
-	}
+	cfg, _ := config.Load()
 
 	// Initialize database connection
-	db, err := database.NewDatabase(cfg.Database)
-	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
-	}
-	defer db.Close()
-
-	// Run database migrations
-	if err := database.RunMigrations(db); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
-	}
-
-	// Load initial data if needed
-	loadInitialData(db)
+	db, _ := database.NewDatabase(cfg.Database)
 
 	// Initialize dependencies
 	container := initDependencies(db)
@@ -75,6 +61,7 @@ func main() {
 
 	// Setup Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// Create HTTP server
 	serverAddr := cfg.Server.Host + ":" + cfg.Server.Port
 	server := &http.Server{
@@ -146,40 +133,5 @@ func initDependencies(db *database.Database) *Container {
 		ProteinService:  proteinService,
 		ProteinUseCases: proteinUseCases,
 		ProteinHandler:  proteinHandler,
-	}
-}
-
-// loadInitialData loads initial protein data from CSV if the database is empty
-func loadInitialData(db *database.Database) {
-	// Check if proteins table has data
-	var count int
-	err := db.Conn.QueryRow("SELECT COUNT(*) FROM proteins").Scan(&count)
-	if err != nil {
-		log.Printf("Error checking protein count: %v", err)
-		return
-	}
-
-	if count > 0 {
-		log.Printf("Database already contains %d proteins, skipping initial data load", count)
-		return
-	}
-
-	log.Println("Database is empty, loading initial protein data...")
-
-	// Try to load from the cleaned dataset first, fallback to original
-	dataPath := "/ml/protein_features_cleaned_combine.csv"
-	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
-		dataPath = "/ml/protein_features.csv"
-		if _, err := os.Stat(dataPath); os.IsNotExist(err) {
-			log.Println("No CSV data files found, skipping initial data load")
-			return
-		}
-	}
-
-	log.Printf("Loading protein data from: %s", dataPath)
-	if err := database.ProcessCompleteDataset(db.Conn, dataPath); err != nil {
-		log.Printf("Failed to load initial data: %v", err)
-	} else {
-		log.Println("Initial protein data loaded successfully")
 	}
 }
