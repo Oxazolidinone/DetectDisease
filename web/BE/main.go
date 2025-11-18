@@ -27,19 +27,18 @@ import (
 	"syscall"
 	"time"
 
-	_ "go-crawler/web/BE/docs"
-	"go-crawler/web/BE/internal/api"
-	"go-crawler/web/BE/internal/domain/services"
-	"go-crawler/web/BE/internal/infrastructure/Repositories"
-	"go-crawler/web/BE/internal/infrastructure/config"
-	"go-crawler/web/BE/internal/infrastructure/database"
-	"go-crawler/web/BE/internal/interfaces/handlers"
-	"go-crawler/web/BE/internal/usecases"
-
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "go-crawler/web/BE/docs"
+	"go-crawler/web/BE/internal/api"
+	"go-crawler/web/BE/internal/domain/services"
+	"go-crawler/web/BE/internal/infrastructure/config"
+	"go-crawler/web/BE/internal/infrastructure/database"
+	"go-crawler/web/BE/internal/infrastructure/repositories"
+	"go-crawler/web/BE/internal/interfaces/handlers"
+	"go-crawler/web/BE/internal/usecases"
 )
 
 func main() {
@@ -100,8 +99,8 @@ func main() {
 
 // Container holds all application dependencies
 type Container struct {
-	// Repositories
-	ProteinRepo *Repositories.ProteinRepositories
+	// repositories
+	ProteinRepo *repositories.ProteinRepositories
 
 	// Services
 	ProteinService services.ProteinDomainService
@@ -117,7 +116,7 @@ type Container struct {
 // initDependencies initializes all application dependencies using dependency injection
 func initDependencies(db *database.Database) *Container {
 	// Initialize repositories
-	proteinRepo := Repositories.NewProteinRepository(db)
+	proteinRepo := repositories.NewProteinRepository(db)
 
 	// Initialize domain services
 	proteinService := services.NewProteinService()

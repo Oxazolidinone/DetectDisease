@@ -5,7 +5,7 @@ import (
 	"errors"
 	"go-crawler/web/BE/internal/domain/entities"
 	"go-crawler/web/BE/internal/domain/services"
-	"go-crawler/web/BE/internal/infrastructure/Repositories"
+	"go-crawler/web/BE/internal/infrastructure/repositories"
 	"strings"
 	"time"
 )
@@ -76,12 +76,12 @@ type ProteinUseCases interface {
 }
 
 type proteinUseCases struct {
-	proteinRepo    *Repositories.ProteinRepositories
+	proteinRepo    *repositories.ProteinRepositories
 	proteinService services.ProteinDomainService
 }
 
 func NewProteinUseCases(
-	proteinRepo *Repositories.ProteinRepositories,
+	proteinRepo *repositories.ProteinRepositories,
 	proteinService services.ProteinDomainService,
 ) ProteinUseCases {
 	return &proteinUseCases{

@@ -2,43 +2,47 @@ package database
 
 import (
 	"time"
+
+	"github.com/uptrace/bun"
 )
 
 // Protein represents a protein entity in the database
 type Protein struct {
-	ID                  string    `db:"id" json:"id"`
-	Name                string    `db:"name" json:"name"`
-	Gene                *string   `db:"gene" json:"gene,omitempty"`
-	Taxo                *string   `db:"taxo" json:"taxo,omitempty"`
-	CC                  *string   `db:"cc" json:"cc,omitempty"`
-	Length              *int      `db:"length" json:"length,omitempty"`
-	Domain              *string   `db:"domain" json:"domain,omitempty"`
-	Family              *string   `db:"family" json:"family,omitempty"`
-	BioProcess          *string   `db:"bio_process" json:"bio_process,omitempty"`
-	Function            *string   `db:"function" json:"function,omitempty"`
-	MW                  *float64  `db:"mw" json:"mw,omitempty"`
-	Seq                 []string  `db:"seq" json:"seq"`
-	NInteractors        *int      `db:"n_interactors" json:"n_interactors,omitempty"`
-	PI                  *float64  `db:"pi" json:"pi,omitempty"`
-	NC74                *float64  `db:"nc_7_4" json:"nc_7_4,omitempty"`
-	HydrophobicityGravy *float64  `db:"hydrophobicity_gravy" json:"hydrophobicity_gravy,omitempty"`
-	DRank               *int      `db:"d_rank" json:"d_rank,omitempty"`
-	LRank               *int      `db:"l_rank" json:"l_rank,omitempty"`
-	FRank               *int      `db:"f_rank" json:"f_rank,omitempty"`
-	Created             time.Time `db:"created" json:"created"`
-	Updated             time.Time `db:"updated" json:"updated"`
+	bun.BaseModel `bun:"table:proteins"`
+
+	ID                  string    `bun:",pk" json:"id"`
+	Name                string    `bun:"name" json:"name"`
+	Gene                *string   `bun:"gene" json:"gene,omitempty"`
+	Taxo                *string   `bun:"taxo" json:"taxo,omitempty"`
+	CC                  *string   `bun:"cc" json:"cc,omitempty"`
+	Length              *int      `bun:"length" json:"length,omitempty"`
+	Domain              *string   `bun:"domain" json:"domain,omitempty"`
+	Family              *string   `bun:"family" json:"family,omitempty"`
+	BioProcess          *string   `bun:"bio_process" json:"bio_process,omitempty"`
+	Function            *string   `bun:"function" json:"function,omitempty"`
+	MW                  *float64  `bun:"mw" json:"mw,omitempty"`
+	Seq                 []string  `bun:"seq" json:"seq"`
+	NInteractors        *int      `bun:"n_interactors" json:"n_interactors,omitempty"`
+	PI                  *float64  `bun:"pi" json:"pi,omitempty"`
+	NC74                *float64  `bun:"nc_7_4" json:"nc_7_4,omitempty"`
+	HydrophobicityGravy *float64  `bun:"hydrophobicity_gravy" json:"hydrophobicity_gravy,omitempty"`
+	DRank               *int      `bun:"d_rank" json:"d_rank,omitempty"`
+	LRank               *int      `bun:"l_rank" json:"l_rank,omitempty"`
+	FRank               *int      `bun:"f_rank" json:"f_rank,omitempty"`
+	Created             time.Time `bun:"created" json:"created"`
+	Updated             time.Time `bun:"updated" json:"updated"`
 }
 
 // Gene represents a gene entity in the database
 type Gene struct {
-	ID   int    `db:"id" json:"id"`
-	Name string `db:"name" json:"name"`
+	ID   int    `bun:"id" json:"id"`
+	Name string `bun:"name" json:"name"`
 }
 
 // ProteinFamily represents a protein family entity in the database
 type ProteinFamily struct {
-	ID   int    `db:"id" json:"id"`
-	Name string `db:"name" json:"name"`
+	ID   int    `bun:"id" json:"id"`
+	Name string `bun:"name" json:"name"`
 }
 
 // ProteinCreateInput represents input for creating a new protein
