@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>User Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="../css/dashboard.css"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": {
+                            "50": "#f0f9ff",
+                            "100": "#e0f2fe",
+                            "200": "#bae6fd",
+                            "300": "#7dd3fc",
+                            "400": "#38bdf8",
+                            "500": "#0ea5e9",
+                            "600": "#0284c7",
+                            "700": "#0369a1",
+                            "800": "#075985",
+                            "900": "#0c4a6e",
+                            "950": "#082f49"
+                        },
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#0D1117",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-display">
+
+<!-- Header -->
+<header class="sticky top-0 z-50 w-full border-b border-solid border-gray-200/50 bg-white/80 backdrop-blur-sm">
+    <div class="container mx-auto flex items-center justify-between whitespace-nowrap px-4 py-3">
+        <div class="flex items-center gap-4 text-gray-800">
+            <div class="size-6 text-primary-500">
+                <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
+                </svg>
+            </div>
+            <h2 class="text-gray-900 text-lg font-bold leading-tight tracking-[-0.015em]">ProteinPredict</h2>
+        </div>
+
+        <div class="hidden items-center gap-9 md:flex">
+            <a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="home.html">Home</a>
+            <a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="input.html">Predict</a>
+            <a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="database.html">Search Database</a>
+            <a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="dashboard.html">Dashboard</a>
+        </div>
+
+        <div class="flex gap-2">
+            <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary-500 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary-600 transition-colors">
+                <span class="truncate">Log In</span>
+            </button>
+            <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 text-gray-800 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-200 transition-colors">
+                <span class="truncate">Sign Up</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-1 p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-wrap gap-2 mb-6">
+            <a class="text-gray-500 text-sm font-medium leading-normal hover:text-gray-900" href="home.html">Home</a>
+            <span class="text-gray-500 text-sm font-medium leading-normal">/</span>
+            <span class="text-gray-900 text-sm font-medium leading-normal">Dashboard</span>
+        </div>
+
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-8">
+            <div class="flex min-w-72 flex-col gap-2">
+                <p class="text-gray-900 text-4xl font-black leading-tight tracking-[-0.033em]">Welcome back!</p>
+                <p class="text-gray-600 text-base font-normal leading-normal">Here is an overview of your activity.</p>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <p class="text-gray-600 text-sm font-medium mb-2">Total Predictions Submitted</p>
+                <p class="text-4xl font-bold text-gray-900" id="total-predictions">0</p>
+            </div>
+            
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <p class="text-gray-600 text-sm font-medium mb-2">Jobs Currently Processing</p>
+                <p class="text-4xl font-bold text-gray-900" id="processing-jobs">0</p>
+            </div>
+            
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <p class="text-gray-600 text-sm font-medium mb-2">Total Saved Proteins</p>
+                <p class="text-4xl font-bold text-gray-900" id="total-saved-proteins">0</p>
+            </div>
+        </div>
+
+        <!-- Recent Prediction Jobs -->
+        <div class="mt-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Recent Prediction Jobs</h2>
+                <a href="input.html" class="text-blue-500 hover:underline text-sm">View All Predictions</a>
+            </div>
+            
+            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50 border-b">
+                            <th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Job Name</th>
+                            <th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Submission Date</th>
+                            <th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Status</th>
+                            <th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-predictions-list">
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-gray-500">
+                                No predictions yet. <a href="input.html" class="text-blue-500 hover:underline">Start a new prediction</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recently Saved Proteins -->
+        <div class="mt-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Recently Saved Proteins</h2>
+                <a href="database.html" class="text-blue-500 hover:underline text-sm">View All Saved Proteins</a>
+            </div>
+            
+            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50 border-b">
+                            <th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Protein Name/ID</th>
+                            <th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Source Organism</th>
+                            <th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Date Saved</th>
+                            <th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recently-saved-list">
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-gray-500">No saved proteins yet. <a href="database.html" class="text-blue-500 hover:underline">Browse database</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="../js/dashboard.js"></script>
+<script src="../js/nav-highlight.js"></script>
+<script src="../js/footer.js"></script>
+<script src="../js/utils.js"></script>
+
+</body>
+</html>

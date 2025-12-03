@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Protein Database Search</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Custom CSS -->
+<link rel="stylesheet" href="../css/database.css"/>
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+</style>
+<script id="tailwind-config">
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#2563eb",
+                    "background-light": "#ffffff",
+                    "secondary": "#db2777"
+                },
+                fontFamily: {
+                    "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+        },
+    }
+</script>
+<!-- Header -->
+<header class="sticky top-0 z-50 w-full border-b border-solid border-gray-200/50 bg-white/80 backdrop-blur-sm">
+<div class="container mx-auto flex items-center justify-between whitespace-nowrap px-4 py-3">
+<div class="flex items-center gap-4 text-gray-800">
+<div class="size-6 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-gray-900 text-lg font-bold leading-tight tracking-[-0.015em]">ProteinPredict</h2>
+</div>
+<div class="hidden items-center gap-9 md:flex">
+<a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="home.html">Home</a>
+<a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="input.html">Predict</a>
+<a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="database.html">Search Database</a>
+<a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="dashboard.html">Dashboard</a>
+</div>
+<div class="flex gap-2">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-blue-600 transition-colors">
+<span class="truncate">Log In</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 text-gray-800 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-200 transition-colors">
+<span class="truncate">Sign Up</span>
+</button>
+</div>
+</div>
+</header>
+
+<!-- Main Content -->
+<main>
+<div class="layout-container flex h-full grow flex-col">
+<div class="flex flex-1 justify-center py-5 px-4 md:px-10 lg:px-20">
+<div class="grid grid-cols-12 gap-8 w-full max-w-screen-2xl">
+<aside class="col-span-12 md:col-span-3">
+<div class="sticky top-24 space-y-6">
+<div class="flex justify-between items-center">
+<h3 class="text-lg font-semibold text-gray-800">Filters</h3>
+<button class="text-sm text-secondary/80 hover:text-secondary hover:underline" onclick="clearAllFilters()">Clear all</button>
+</div>
+<div class="space-y-3">
+<h4 class="font-medium text-gray-700">Organism</h4>
+<div class="space-y-2">
+<label class="flex items-center gap-2 text-sm text-gray-600">
+<input class="form-checkbox h-4 w-4 rounded bg-gray-100 border-gray-300 text-primary focus:ring-primary/50" type="checkbox" onchange="applyFilters()" id="organism-homo"/>
+<span>Homo sapiens</span>
+</label>
+<label class="flex items-center gap-2 text-sm text-gray-600">
+<input class="form-checkbox h-4 w-4 rounded bg-gray-100 border-gray-300 text-primary focus:ring-primary/50" type="checkbox" onchange="applyFilters()" id="organism-mus"/>
+<span>Mus musculus</span>
+</label>
+<label class="flex items-center gap-2 text-sm text-gray-600">
+<input class="form-checkbox h-4 w-4 rounded bg-gray-100 border-gray-300 text-primary focus:ring-primary/50" type="checkbox" onchange="applyFilters()" id="organism-other"/>
+<span>Other Organisms</span>
+</label>
+</div>
+</div>
+<div class="space-y-3">
+<h4 class="font-medium text-gray-700">Function Category</h4>
+<div class="space-y-2">
+<label class="flex items-center gap-2 text-sm text-gray-600">
+<input class="form-checkbox h-4 w-4 rounded bg-gray-100 border-gray-300 text-primary focus:ring-primary/50" type="checkbox" onchange="applyFilters()" id="func-kinase"/>
+<span>Kinase</span>
+</label>
+<label class="flex items-center gap-2 text-sm text-gray-600">
+<input class="form-checkbox h-4 w-4 rounded bg-gray-100 border-gray-300 text-primary focus:ring-primary/50" type="checkbox" onchange="applyFilters()" id="func-enzyme"/>
+<span>Enzyme</span>
+</label>
+<label class="flex items-center gap-2 text-sm text-gray-600">
+<input class="form-checkbox h-4 w-4 rounded bg-gray-100 border-gray-300 text-primary focus:ring-primary/50" type="checkbox" onchange="applyFilters()" id="func-receptor"/>
+<span>Receptor</span>
+</label>
+<label class="flex items-center gap-2 text-sm text-gray-600">
+<input class="form-checkbox h-4 w-4 rounded bg-gray-100 border-gray-300 text-primary focus:ring-primary/50" type="checkbox" onchange="applyFilters()" id="func-protease"/>
+<span>Protease</span>
+</label>
+</div>
+</div>
+<div class="space-y-3">
+<h4 class="font-medium text-gray-700">Protein Length</h4>
+<div class="space-y-2">
+<label class="text-sm text-gray-600">
+Min: <input type="number" id="length-min" placeholder="e.g. 400" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" oninput="applyFilters()"/>
+</label>
+<label class="text-sm text-gray-600">
+Max: <input type="number" id="length-max" placeholder="e.g. 1000" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" oninput="applyFilters()"/>
+</label>
+</div>
+</div>
+<div class="space-y-3">
+<h4 class="font-medium text-gray-700">Molecular Weight</h4>
+<div class="space-y-2">
+<label class="text-sm text-gray-600">
+Min: <input type="number" id="weight-min" placeholder="e.g. 40000" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" oninput="applyFilters()"/>
+</label>
+<label class="text-sm text-gray-600">
+Max: <input type="number" id="weight-max" placeholder="e.g. 150000" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" oninput="applyFilters()"/>
+</label>
+</div>
+</div>
+</div>
+</aside>
+<main class="col-span-12 md:col-span-9">
+<div class="flex flex-col gap-4">
+<div class="flex flex-wrap justify-between gap-3">
+<div class="flex min-w-72 flex-col gap-3">
+<p class="text-gray-900 text-4xl font-black leading-tight tracking-[-0.033em]">Protein Database Search</p>
+<p class="text-gray-500 text-base font-normal leading-normal">Search for existing proteins in a database and view their known functions.</p>
+</div>
+</div>
+<div class="py-3">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full shadow-sm">
+<div class="text-gray-500 flex border border-solid border-gray-200 bg-gray-50 items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-solid border-gray-200 bg-white focus:border-primary h-full placeholder:text-gray-400 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search by Protein Name, UniProt ID, Gene..." id="search-input" oninput="handleSearch()"/>
+</div>
+</label>
+</div>
+<p class="text-gray-500 text-sm font-normal leading-normal pb-3 pt-1">Showing <span id="result-count">5</span> results for '<span id="search-query">Kinase</span>'</p>
+<div class="py-3 @container">
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead>
+<tr class="bg-gray-50 border-b">
+<th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold"> </th>
+<th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">ID</th>
+<th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Recommended Name</th>
+<th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Gene Name</th>
+<th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Organism</th>
+<th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Length</th>
+<th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Mol. Weight</th>
+<th class="text-left py-3 px-4 text-gray-600 text-sm font-semibold">Function</th>
+</tr>
+</thead>
+<tbody id="protein-table-body">
+<!-- Data will be loaded here -->
+</tbody>
+</table>
+</div>
+</div>
+<div class="flex items-center justify-center pt-4">
+<nav aria-label="Pagination" class="flex items-center gap-2" id="pagination">
+<!-- Pagination will be generated here -->
+</nav>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div>
+</div>
+<script>
+    // Highlight active nav link
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPage = window.location.pathname.split('/').pop() || 'input.html';
+        const navLinks = document.querySelectorAll('header a');
+        
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href === currentPage || (currentPage === '' && href === 'home.html')) {
+                link.classList.remove('text-gray-600', 'hover:text-accent');
+                link.classList.add('text-accent', 'font-semibold');
+            }
+        });
+    });
+</script>
+<script src="../js/database.js"></script>
+<script src="../js/nav-highlight.js"></script>
+<script src="../js/footer.js"></script>
+<script src="../js/utils.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Home Page - ProteinPredict</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0..200" rel="stylesheet"/>
+<!-- Custom CSS -->
+<link rel="stylesheet" href="../css/home.css"/>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#3B82F6",
+                    "primary-light": "#DBEAFE",
+                    "accent": "#EC4899",
+                    "accent-light": "#FCE7F3",
+                    "background-light": "#ffffff",
+                    "background-dark": "#020617",
+                    "dark-surface": "#0f172a",
+                    "dark-border": "#1e293b",
+                },
+                fontFamily: {
+                    "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+                },
+            },
+        },
+    }
+</script>
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+</style>
+</head>
+<body class="bg-background-light font-display">
+<div class="relative flex min-h-screen w-full flex-col">
+<header class="sticky top-0 z-50 w-full border-b border-solid border-gray-200/50 bg-background-light/80 backdrop-blur-sm">
+<div class="container mx-auto flex items-center justify-between whitespace-nowrap px-4 py-3">
+<div class="flex items-center gap-4 text-gray-800">
+<div class="size-6 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-gray-900 text-lg font-bold leading-tight tracking-[-0.015em]">ProteinPredict</h2>
+</div>
+<div class="hidden items-center gap-9 md:flex">
+<a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="home.html">Home</a>
+<a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="input.html">Predict</a>
+<a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="database.html">Search Database</a>
+<a class="text-gray-600 text-sm font-medium leading-normal hover:text-pink-500 hover:font-semibold hover:scale-110 transition-transform duration-200" href="dashboard.html">Dashboard</a>
+</div>
+<div class="flex gap-2">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-blue-600 transition-colors">
+<span class="truncate">Log In</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 text-gray-800 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-200 transition-colors">
+<span class="truncate">Sign Up</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow">
+<div class="container mx-auto max-w-5xl px-4 py-5 sm:px-6 lg:px-8">
+<div class="@container py-10">
+<div class="flex flex-col-reverse gap-8 px-4 py-10 @[864px]:flex-row @[864px]:items-center">
+<div class="flex flex-col gap-6 text-center @[864px]:flex-1 @[864px]:text-left">
+<div class="flex flex-col gap-4">
+<h1 class="text-gray-900 text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl">Unlock the Secrets of <span class="text-primary">Protein</span> Function</h1>
+<p class="text-gray-600 text-base font-normal leading-normal @[480px]:text-lg">Leverage our cutting-edge AI to get fast and accurate protein function predictions. Turn your sequence or structure data into actionable insights in minutes.</p>
+</div>
+<div class="flex justify-center @[864px]:justify-start">
+<button class="flex w-full max-w-[240px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-accent text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-pink-600 transition-colors" onclick="window.location.href='input.html'">
+<span class="truncate">Start Your Prediction Now</span>
+</button>
+</div>
+</div>
+<div class="w-full flex-1 bg-center bg-no-repeat aspect-square bg-cover rounded-lg" data-alt="Abstract 3D visualization of a protein structure with swirling ribbons and helixes in blue and purple tones." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDWYCFrU5TxXDwgBATRDA8tFmxcCVDdKg4NQ3NBbkNfYU8OCHRlz_gLHI6Z6nwCzEsNR9c8vJct6q-HvO1_vG_FetqFrEBO9gpg72FSAnQBPin_Y6IroAnH4BUhnqnpd78EvE6-o7__4pFH7jZ2ieuLjvQNuHkTqLKp0Ldk-jTjoU_LN2RxBucRO41kTN_8vqPVbVlBKOGL5Gw3YjypzcQaWjGNI5D751VleReatIoF1m2K4pl9BhCswqFG11FsdQHHoqCrPzylz8Q");'></div>
+</div>
+</div>
+<div class="flex flex-col gap-10 px-4 py-10 @container">
+<div class="flex flex-col gap-4 text-center">
+<h2 class="text-gray-900 tracking-light text-3xl font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em] max-w-3xl mx-auto">Powerful Tools for Modern Biology</h2>
+<p class="text-gray-600 text-base font-normal leading-normal max-w-3xl mx-auto">Our platform is equipped with state-of-the-art features to streamline your research and accelerate discovery.</p>
+</div>
+<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+<div class="flex flex-1 flex-col gap-3 rounded-lg border border-gray-200 bg-white p-6 text-center items-center">
+<span class="material-symbols-outlined text-primary text-4xl mb-2">verified</span>
+<div class="flex flex-col gap-1">
+<h3 class="text-gray-900 text-lg font-bold leading-tight">Accurate Predictions</h3>
+<p class="text-gray-500 text-sm font-normal leading-normal">Utilize our advanced machine learning models for high-confidence function predictions.</p>
+</div>
+</div>
+<div class="flex flex-1 flex-col gap-3 rounded-lg border border-gray-200 bg-white p-6 text-center items-center">
+<span class="material-symbols-outlined text-primary text-4xl mb-2">database</span>
+<div class="flex flex-col gap-1">
+<h3 class="text-gray-900 text-lg font-bold leading-tight">Comprehensive Database</h3>
+<p class="text-gray-500 text-sm font-normal leading-normal">Search and cross-reference your findings with a vast, curated database of known proteins.</p>
+</div>
+</div>
+<div class="flex flex-1 flex-col gap-3 rounded-lg border border-gray-200 bg-white p-6 text-center items-center">
+<span class="material-symbols-outlined text-primary text-4xl mb-2">dashboard</span>
+<div class="flex flex-col gap-1">
+<h3 class="text-gray-900 text-lg font-bold leading-tight">Personalized Dashboard</h3>
+<p class="text-gray-500 text-sm font-normal leading-normal">Easily manage, track, and compare your past and current prediction jobs in one place.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="px-4 py-16">
+<h2 class="text-center text-gray-900 text-3xl font-bold leading-tight tracking-[-0.015em] pb-12">How It Works</h2>
+<div class="grid max-w-2xl mx-auto grid-cols-[auto_1fr] gap-x-6 gap-y-4">
+<div class="flex flex-col items-center gap-2">
+<div class="grid place-items-center bg-primary-light text-primary rounded-full size-12">
+<span class="material-symbols-outlined text-3xl">upload_file</span>
+</div>
+<div class="w-px bg-gray-300 grow"></div>
+</div>
+<div class="flex flex-col pb-10">
+<p class="text-xs text-gray-500">Step 1</p>
+<p class="text-lg font-medium text-gray-900">Input Your Protein</p>
+<p class="text-gray-600">Submit your protein sequence or structure file through our simple and secure upload interface.</p>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="grid place-items-center bg-accent-light text-accent rounded-full size-12">
+<span class="material-symbols-outlined text-3xl">model_training</span>
+</div>
+<div class="w-px bg-gray-300 grow"></div>
+</div>
+<div class="flex flex-col pb-10">
+<p class="text-xs text-gray-500">Step 2</p>
+<p class="text-lg font-medium text-gray-900">Run Analysis</p>
+<p class="text-gray-600">Our powerful AI algorithms analyze your data, comparing it against vast datasets to predict its function.</p>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="grid place-items-center bg-primary-light text-primary rounded-full size-12">
+<span class="material-symbols-outlined text-3xl">analytics</span>
+</div>
+</div>
+<div class="flex flex-col pb-10">
+<p class="text-xs text-gray-500">Step 3</p>
+<p class="text-lg font-medium text-gray-900">View Results</p>
+<p class="text-gray-600">Receive a detailed report with function predictions, confidence scores, and interactive visualizations.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="w-full border-t border-gray-200 bg-background-light">
+<div class="container mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+<div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
+<div class="flex items-center gap-3">
+<div class="size-5 text-gray-600">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+</svg>
+</div>
+<p class="text-sm text-gray-600">© 2025 ProteinPredict. All rights reserved.</p>
+</div>
+<div class="flex gap-6">
+<a class="text-sm text-gray-600 hover:text-accent" href="#">Documentation</a>
+<a class="text-sm text-gray-600 hover:text-accent" href="#">Contact</a>
+<a class="text-sm text-gray-600 hover:text-accent" href="#">Terms of Service</a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+
+
+<script src="../js/utils.js"></script>
+<script src="../js/input.js"></script>
+
+</body>
+</html>
