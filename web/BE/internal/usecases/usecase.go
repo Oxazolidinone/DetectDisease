@@ -17,26 +17,26 @@ var (
 )
 
 type ProteinCreateRequest struct {
-	ID       string   `json:"id" validate:"required"`
-	Name     string   `json:"name" validate:"required"`
+	ID       string  `json:"id" validate:"required"`
+	Name     string  `json:"name" validate:"required"`
 	Seq      []string `json:"seq" validate:"required"`
-	Gene     *string  `json:"gene,omitempty"`
-	Taxo     *string  `json:"taxo,omitempty"`
-	CC       *string  `json:"cc,omitempty"`
-	Domain   *string  `json:"domain,omitempty"`
-	Family   *string  `json:"family,omitempty"`
-	Function *string  `json:"function,omitempty"`
+	Gene     *string `json:"gene,omitempty"`
+	Taxo     *string `json:"taxo,omitempty"`
+	CC       *string `json:"cc,omitempty"`
+	Domain   *string `json:"domain,omitempty"`
+	Family   *string `json:"family,omitempty"`
+	Function *string `json:"function,omitempty"`
 }
 
 type ProteinUpdateRequest struct {
-	Name     *string  `json:"name,omitempty"`
-	Seq      []string `json:"seq,omitempty"`
-	Gene     *string  `json:"gene,omitempty"`
-	Taxo     *string  `json:"taxo,omitempty"`
-	CC       *string  `json:"cc,omitempty"`
-	Domain   *string  `json:"domain,omitempty"`
-	Family   *string  `json:"family,omitempty"`
-	Function *string  `json:"function,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Seq      []string  `json:"seq,omitempty"`
+	Gene     *string `json:"gene,omitempty"`
+	Taxo     *string `json:"taxo,omitempty"`
+	CC       *string `json:"cc,omitempty"`
+	Domain   *string `json:"domain,omitempty"`
+	Family   *string `json:"family,omitempty"`
+	Function *string `json:"function,omitempty"`
 }
 
 type ComparisonRequest struct {

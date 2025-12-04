@@ -43,7 +43,7 @@ func Load() (*Config, error) {
 			Port:     getEnv("DB_PORT", "5432"),
 			Username: getEnv("DB_USERNAME", "postgres"),
 			Password: getEnv("DB_PASSWORD", "password"),
-			Database: getEnv("DB_DATABASE", "protein_db"),
+			Database: getEnv("DB_DATABASE", "postgres"),
 			SSLMode:  getEnv("DB_SSL_MODE", "disable"),
 		},
 		ML: MLConfig{

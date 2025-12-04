@@ -2,7 +2,6 @@ package entities
 
 import (
 	"errors"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -26,14 +25,14 @@ type Protein struct {
 	BioProcess          *string   `json:"bio_process,omitempty" db:"bio_process"`
 	Function            *string   `json:"function,omitempty" db:"function"`
 	MW                  *float64  `json:"mw,omitempty" db:"mw"`
-	Seq                 []string  `json:"seq" db:"seq"`
+	Seq                 []string  `bun:"seq,array" json:"seq"`
 	NInteractors        *int      `json:"n_interactors,omitempty" db:"n_interactors"`
 	PI                  *float64  `json:"pi,omitempty" db:"pi"`
 	NC74                *float64  `json:"nc_7_4,omitempty" db:"nc_7_4"`
 	HydrophobicityGravy *float64  `json:"hydrophobicity_gravy,omitempty" db:"hydrophobicity_gravy"`
 	DRank               *int      `json:"d_rank,omitempty" db:"d_rank"`
-	LRank               *int      `json:"l_rank,omitempty" db:"l_rank"`
-	FRank               *int      `json:"f_rank,omitempty" db:"f_rank"`
+	LRank               *string   `json:"l_rank,omitempty" db:"l_rank"`
+	FRank               *string   `json:"f_rank,omitempty" db:"f_rank"`
 	Created             time.Time `json:"created" db:"created"`
 	Updated             time.Time `json:"updated" db:"updated"`
 }
@@ -56,31 +55,12 @@ func NewProtein(id, name string, seq []string) (*Protein, error) {
 		Created: time.Now(),
 		Updated: time.Now(),
 	}
-
-	if err := p.ValidateSequence(); err != nil {
-		return nil, err
-	}
-
 	p.calculateLength()
 	return p, nil
 }
 
-func (p *Protein) ValidateSequence() error {
-	if len(p.Seq) == 0 {
-		return ErrSequenceTooShort
-	}
-
-	validAminoAcids := regexp.MustCompile(`^[ACDEFGHIKLMNPQRSTVWY]+$`)
-	for _, chunk := range p.Seq {
-		if !validAminoAcids.MatchString(strings.ToUpper(chunk)) {
-			return ErrInvalidSequenceFormat
-		}
-	}
-	return nil
-}
-
 func (p *Protein) calculateLength() {
-	totalLength := 0
+	var totalLength int = 0
 	for _, chunk := range p.Seq {
 		totalLength += len(chunk)
 	}
@@ -88,21 +68,18 @@ func (p *Protein) calculateLength() {
 }
 
 func (p *Protein) GetFullSequence() string {
-	return strings.Join(p.Seq, "")
+	var fullseq string
+	for _, chunk := range p.Seq {
+		fullseq += chunk
+	}
+	return fullseq
 }
 
 func (p *Protein) UpdateSequence(seq []string) error {
 	if len(seq) == 0 {
 		return ErrSequenceTooShort
 	}
-
-	oldSeq := p.Seq
 	p.Seq = seq
-	if err := p.ValidateSequence(); err != nil {
-		p.Seq = oldSeq
-		return err
-	}
-
 	p.calculateLength()
 	p.Updated = time.Now()
 	return nil

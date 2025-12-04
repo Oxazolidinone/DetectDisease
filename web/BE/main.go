@@ -27,10 +27,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "go-crawler/web/BE/docs"
 	"go-crawler/web/BE/internal/api"
 	"go-crawler/web/BE/internal/domain/services"
@@ -39,6 +35,11 @@ import (
 	"go-crawler/web/BE/internal/infrastructure/repositories"
 	"go-crawler/web/BE/internal/interfaces/handlers"
 	"go-crawler/web/BE/internal/usecases"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -49,14 +50,14 @@ func main() {
 	db, _ := database.NewDatabase(cfg.Database)
 
 	// Initialize dependencies
-	container := initDependencies(db)
+	proteinHandler := handlers.NewProteinHandler(usecases.NewProteinUseCases(repositories.NewProteinRepository(db.Conn), services.NewProteinService()))
 
 	// Setup Gin router
 	gin.SetMode(cfg.Server.Mode)
 	router := gin.Default()
 
 	// Setup routes
-	api.SetUpRoutes(router, container.ProteinHandler)
+	api.SetUpRoutes(router, proteinHandler)
 
 	// Setup Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -94,43 +95,5 @@ func main() {
 		log.Printf("Server forced to shutdown: %v", err)
 	} else {
 		log.Println("Server exited gracefully")
-	}
-}
-
-// Container holds all application dependencies
-type Container struct {
-	// repositories
-	ProteinRepo *repositories.ProteinRepositories
-
-	// Services
-	ProteinService services.ProteinDomainService
-	MLService      services.MLPredictionService
-
-	// Use Cases
-	ProteinUseCases usecases.ProteinUseCases
-
-	// Handlers
-	ProteinHandler *handlers.ProteinHandler
-}
-
-// initDependencies initializes all application dependencies using dependency injection
-func initDependencies(db *database.Database) *Container {
-	// Initialize repositories
-	proteinRepo := repositories.NewProteinRepository(db)
-
-	// Initialize domain services
-	proteinService := services.NewProteinService()
-
-	// Initialize use cases
-	proteinUseCases := usecases.NewProteinUseCases(proteinRepo, proteinService)
-
-	// Initialize handlers
-	proteinHandler := handlers.NewProteinHandler(proteinUseCases)
-
-	return &Container{
-		ProteinRepo:     proteinRepo,
-		ProteinService:  proteinService,
-		ProteinUseCases: proteinUseCases,
-		ProteinHandler:  proteinHandler,
 	}
 }

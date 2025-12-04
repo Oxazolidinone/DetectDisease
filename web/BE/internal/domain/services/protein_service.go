@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ErrProteinNil         = errors.New("protein cannot be nil")
-	ErrInvalidSequence    = errors.New("invalid protein sequence")
+	ErrProteinNil      = errors.New("protein cannot be nil")
+	ErrInvalidSequence = errors.New("invalid protein sequence")
 )
 
 type ProteinDomainService interface {
