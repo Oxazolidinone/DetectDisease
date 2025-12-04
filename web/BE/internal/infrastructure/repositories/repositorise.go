@@ -186,10 +186,19 @@ func (p *ProteinRepositories) Search(ctx context.Context, filter *entities.Prote
 	}
 
 	var dbProteins []database.Protein
-	err = query.Order(fmt.Sprintf("%s %s", orderBy, orderDirection)).
-		Limit(filter.Limit).
-		Offset(filter.Offset).
-		Scan(ctx, &dbProteins)
+
+	// Use BunDB's safe ordering instead of string interpolation
+	if orderDirection == "ASC" {
+		err = query.OrderExpr("? ASC", bun.Ident(orderBy)).
+			Limit(filter.Limit).
+			Offset(filter.Offset).
+			Scan(ctx, &dbProteins)
+	} else {
+		err = query.OrderExpr("? DESC", bun.Ident(orderBy)).
+			Limit(filter.Limit).
+			Offset(filter.Offset).
+			Scan(ctx, &dbProteins)
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to search proteins: %w", err)
@@ -280,15 +289,16 @@ func (p *ProteinRepositories) Delete(ctx context.Context, id string) error {
 func (p *ProteinRepositories) GetStats(ctx context.Context) (*entities.ProteinStats, error) {
 	var stats entities.ProteinStats
 
+	// Use BunDB's built-in functions for better safety and readability
 	err := p.db.NewSelect().Model((*database.Protein)(nil)).
-		ColumnExpr("COUNT(*) as total_proteins").
-		ColumnExpr("AVG(length) as avg_length").
-		ColumnExpr("AVG(mw) as avg_mw").
-		ColumnExpr("AVG(pi) as avg_pi").
-		ColumnExpr("AVG(n_interactors) as avg_n_interactors").
-		ColumnExpr("AVG(hydrophobicity_gravy) as avg_hydrophobicity").
-		ColumnExpr("COUNT(DISTINCT gene) as total_genes").
-		ColumnExpr("COUNT(DISTINCT family) as total_families").
+		ColumnExpr("COUNT(?) as total_proteins", bun.Ident("*")).
+		ColumnExpr("AVG(?) as avg_length", bun.Ident("length")).
+		ColumnExpr("AVG(?) as avg_mw", bun.Ident("mw")).
+		ColumnExpr("AVG(?) as avg_pi", bun.Ident("pi")).
+		ColumnExpr("AVG(?) as avg_n_interactors", bun.Ident("n_interactors")).
+		ColumnExpr("AVG(?) as avg_hydrophobicity", bun.Ident("hydrophobicity_gravy")).
+		ColumnExpr("COUNT(DISTINCT ?) as total_genes", bun.Ident("gene")).
+		ColumnExpr("COUNT(DISTINCT ?) as total_families", bun.Ident("family")).
 		Scan(ctx, &stats)
 
 	if err != nil {
