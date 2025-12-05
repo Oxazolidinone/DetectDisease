@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Protein Function Prediction</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0..200" rel="stylesheet"/>
+<link rel="stylesheet" href="../css/input.css"/>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#3B82F6",
+                    "primary-light": "#DBEAFE",
+                    "accent": "#EC4899",
+                    "accent-light": "#FCE7F3",
+                    "background-light": "#ffffff",
+                    "background-dark": "#020617",
+                    "dark-surface": "#0f172a",
+                    "dark-border": "#1e293b"
+                },
+                fontFamily: {
+                    "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+                }
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+</style>
+</head>
+<body class="bg-background-light min-h-screen font-display text-gray-900">
+
+<!-- Header -->
+<header class="w-full py-6 bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-700 relative overflow-hidden shadow-xl">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute -top-4 -left-4 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div class="absolute -top-4 -right-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-cyan-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="flex items-center justify-between max-w-screen-xl mx-auto">
+            <div class="flex items-center gap-4 text-white">
+                <div class="size-10 text-white animate-pulse">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black leading-tight tracking-[-0.015em] drop-shadow-lg">ProteinPredict</h1>
+                    <p class="text-cyan-100 text-xs mt-0.5 opacity-90">AI-Powered Research Platform</p>
+                </div>
+            </div>
+            <nav class="flex items-center gap-6">
+                <a href="home.html" class="text-sm text-white/80 hover:text-white transition-colors">Home</a>
+                <a href="input.html" class="text-sm font-semibold text-white border-b-2 border-white pb-0.5">Predict</a>
+                <a href="database.html" class="text-sm text-white/80 hover:text-white transition-colors">Database</a>
+                <a href="advanced.html" class="text-sm text-white/80 hover:text-white transition-colors">Advanced</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<!-- Page Title Section -->
+<div class="bg-gray-50 border-b border-gray-200">
+    <div class="container mx-auto max-w-screen-xl px-6 py-8">
+        <div class="flex items-center gap-4">
+            <div class="grid place-items-center bg-accent-light text-accent rounded-full size-14">
+                <span class="material-symbols-outlined text-3xl">model_training</span>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Protein Function Prediction</h2>
+                <p class="text-gray-600 mt-1">Submit a protein for AI-powered analysis</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<main class="max-w-screen-xl mx-auto px-6 py-6">
+    <div class="flex gap-8">
+        
+        <!-- Main Form Area -->
+        <div class="flex-1">
+            
+            <!-- Input Card -->
+            <div class="border border-gray-200 bg-white mb-6 rounded-lg overflow-hidden">
+                <!-- Tabs -->
+                <div class="border-b border-gray-200 bg-gray-50">
+                    <div class="flex">
+                        <button class="tab-button px-6 py-3 text-sm font-semibold border-b-2 border-primary text-primary bg-white" data-tab="sequence" onclick="switchTab(this)">
+                            Enter Sequence
+                        </button>
+                        <button class="tab-button px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 border-b-2 border-transparent" data-tab="upload" onclick="switchTab(this)">
+                            Upload File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab 1: Enter Sequence -->
+                <div id="sequence-tab" class="tab-content active p-6">
+                    <!-- Protein Basic Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Protein Name <span class="text-gray-400">(Optional)</span>
+                            </label>
+                            <input type="text" id="protein-name"
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                placeholder="e.g., Amyloid-beta precursor protein">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Gene Name <span class="text-gray-400">(Optional)</span>
+                            </label>
+                            <input type="text" id="gene-name"
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                placeholder="e.g., APP">
+                        </div>
+                    </div>
+
+                    <!-- Sequence Input (Required) -->
+                    <label class="block mb-4">
+                        <span class="text-sm font-medium text-gray-700 mb-2 block">
+                            Protein Sequence <span class="text-red-500">*</span>
+                        </span>
+                        <textarea id="sequence-input"
+                            class="w-full min-h-32 p-4 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            placeholder=">sp|P05067|A4_HUMAN Amyloid-beta precursor protein
+MLPGLALLLLAAWTARALEVPTDGNAGLLAEPQIAMFCGRLNMHMNVQNGKWDSDPSGTKTCIDTKEGILQYCQSWAISSTCMLVTSRSTGYPSNLSTSYMFSSRRYAATMDTCRLAGAKYFTNATELHDKF"></textarea>
+                        <div class="flex justify-between mt-2">
+                            <p id="char-counter" class="text-xs text-gray-500">0 characters</p>
+                            <p id="validation-message" class="text-xs"></p>
+                        </div>
+                    </label>
+
+                    <!-- Additional Protein Properties (Optional) -->
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                        <button type="button" onclick="toggleAdvancedFields()"
+                            class="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 mb-3">
+                            <span id="toggle-icon">▶</span>
+                            <span>Additional Protein Properties (Optional)</span>
+                        </button>
+
+                        <div id="advanced-fields" class="hidden space-y-4">
+                            <!-- Model Selection -->
+                            <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 mb-4">
+                                <label class="block text-sm font-semibold text-gray-800 mb-3">
+                                    🤖 ML Model Selection
+                                </label>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <label class="flex items-center p-3 bg-white border-2 border-gray-200 rounded-lg cursor-pointer hover:border-purple-400 transition-all">
+                                        <input type="radio" name="ml-model" value="lightgbm_best" checked
+                                            class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                                        <div class="ml-3">
+                                            <div class="text-sm font-semibold text-gray-800">LightGBM Best</div>
+                                            <div class="text-xs text-gray-500">Recommended • Fast & Accurate</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 bg-white border-2 border-gray-200 rounded-lg cursor-pointer hover:border-purple-400 transition-all">
+                                        <input type="radio" name="ml-model" value="xgboost"
+                                            class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                                        <div class="ml-3">
+                                            <div class="text-sm font-semibold text-gray-800">XGBoost</div>
+                                            <div class="text-xs text-gray-500">High Performance</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 bg-white border-2 border-gray-200 rounded-lg cursor-pointer hover:border-purple-400 transition-all">
+                                        <input type="radio" name="ml-model" value="random_forest"
+                                            class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                                        <div class="ml-3">
+                                            <div class="text-sm font-semibold text-gray-800">Random Forest</div>
+                                            <div class="text-xs text-gray-500">Ensemble Method</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="mt-3 text-xs text-gray-600 bg-white/70 p-2 rounded">
+                                    <strong>Note:</strong> LightGBM Best is the recommended model based on validation performance.
+                                    Other models may provide different insights.
+                                </div>
+                            </div>
+
+                            <!-- Protein Properties -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Length (AA)
+                                    </label>
+                                    <input type="number" id="protein-length"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                        placeholder="Auto-calculated" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Molecular Weight (Da)
+                                    </label>
+                                    <input type="number" step="0.01" id="molecular-weight"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                        placeholder="e.g., 12000">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Isoelectric Point (pI)
+                                    </label>
+                                    <input type="number" step="0.01" id="pi-value"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                        placeholder="e.g., 5.4">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Net Charge at pH 7.4
+                                    </label>
+                                    <input type="number" step="0.01" id="net-charge"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                        placeholder="e.g., -2.5">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Hydrophobicity (GRAVY)
+                                    </label>
+                                    <input type="number" step="0.001" id="hydrophobicity"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                        placeholder="e.g., -0.234">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Number of Interactors
+                                    </label>
+                                    <input type="number" id="interactors"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                        placeholder="e.g., 12">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Organism / Taxonomic Lineage
+                                    </label>
+                                    <input type="text" id="organism"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                        placeholder="e.g., Homo sapiens">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Protein Family
+                                    </label>
+                                    <input type="text" id="family"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                        placeholder="e.g., APP family">
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+                                <strong>Note:</strong> These additional properties are optional and for reference only.
+                                The ML model primarily uses the protein sequence for disease prediction.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Upload File -->
+                <div id="upload-tab" class="tab-content p-6">
+                    <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary hover:bg-primary-light/30 cursor-pointer transition-all" style="min-height: 200px;">
+                        <p class="text-base font-medium text-gray-700 mb-2">Drag and drop your file here</p>
+                        <p class="text-sm text-gray-500 mb-4">or click to select a file</p>
+                        <button class="px-6 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-pink-600 transition-colors" onclick="document.getElementById('file-input').click()">
+                            Choose File
+                        </button>
+                        <input type="file" id="file-input" accept=".fasta,.fa,.txt,.csv,.pdb" class="hidden"/>
+                    </div>
+
+                    <!-- File Preview -->
+                    <div id="file-preview" class="hidden mt-6 p-4 bg-gray-50 border border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p id="file-name" class="font-semibold text-gray-800"></p>
+                                <p id="file-size" class="text-xs text-gray-500"></p>
+                            </div>
+                            <button class="text-gray-400 hover:text-red-500 text-sm" onclick="removeFile()">Remove</button>
+                        </div>
+                        <div id="file-content-preview" class="bg-white p-4 border border-gray-300 max-h-48 overflow-y-auto font-mono text-xs text-gray-700"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Options -->
+            <div class="border border-gray-200 bg-white mb-6 rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-800">Advanced Options</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 block mb-2">Prediction Model</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                                <option>Default Model (v2.1)</option>
+                                <option>Legacy Model (v1.8)</option>
+                                <option>Experimental Model</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 block mb-2">Job Priority</label>
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                                <option>Normal</option>
+                                <option>High</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Predict Button -->
+            <div class="flex gap-4">
+                <button id="predict-button" class="px-8 py-3 bg-accent text-white text-sm font-bold rounded-lg hover:bg-pink-600 transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    Predict Function
+                </button>
+                <button class="px-6 py-3 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                    Clear
+                </button>
+            </div>
+
+            <!-- Status Message -->
+            <div id="status-message" class="hidden mt-4 p-4 border text-sm"></div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <aside class="w-72 flex-shrink-0">
+            <!-- Input Guidelines -->
+            <div class="border border-gray-200 bg-white mb-6 rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-primary-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Input Guidelines</span>
+                </div>
+                <div class="p-4">
+                    <table class="w-full text-sm">
+                        <tr class="border-b border-gray-100">
+                            <td class="py-2 text-gray-600">FASTA Sequence</td>
+                            <td class="py-2 text-right text-gray-800">Supported</td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-2 text-gray-600">File formats</td>
+                            <td class="py-2 text-right text-gray-800">.fasta, .fa, .pdb, .txt, .csv</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 text-gray-600">Max file size</td>
+                            <td class="py-2 text-right text-gray-800">10MB</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Predictions -->
+            <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-accent-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Recent Predictions</span>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-sm text-gray-800">Job #A4B1C2</p>
+                            <p class="text-xs text-gray-500">Sequence paste</p>
+                        </div>
+                        <span class="text-xs font-medium px-2 py-1 bg-green-100 text-green-700">Completed</span>
+                    </div>
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-sm text-gray-800">Job #D3E4F5</p>
+                            <p class="text-xs text-gray-500">File upload</p>
+                        </div>
+                        <span class="text-xs font-medium px-2 py-1 bg-amber-100 text-amber-700">Running</span>
+                    </div>
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-sm text-gray-800">Job #G6H7I8</p>
+                            <p class="text-xs text-gray-500">File upload</p>
+                        </div>
+                        <span class="text-xs font-medium px-2 py-1 bg-red-100 text-red-700">Failed</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="w-full border-t border-gray-200/30 bg-gray-900 mt-8">
+    <div class="container mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
+            <div class="flex items-center gap-3">
+                <div class="size-5 text-gray-600">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                <p class="text-sm text-gray-600">© 2025 ProteinPredict. All rights reserved.</p>
+            </div>
+            <div class="flex gap-6">
+                <a class="text-sm text-gray-600 hover:text-accent" href="#">Documentation</a>
+                <a class="text-sm text-gray-600 hover:text-accent" href="#">Contact</a>
+                <a class="text-sm text-gray-600 hover:text-accent" href="#">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="../js/utils.js"></script>
+<script src="../js/input.js"></script>
+</body>
+</html>

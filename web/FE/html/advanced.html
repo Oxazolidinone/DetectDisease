@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Advanced Protein Tools</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0..200" rel="stylesheet"/>
+<link rel="stylesheet" href="../css/database.css"/>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#3B82F6",
+                    "primary-light": "#DBEAFE",
+                    "accent": "#EC4899",
+                    "accent-light": "#FCE7F3",
+                    "background-light": "#ffffff",
+                    "background-dark": "#020617",
+                    "dark-surface": "#0f172a",
+                    "dark-border": "#1e293b"
+                },
+                fontFamily: {
+                    "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+                }
+            },
+        },
+    }
+</script>
+<style>
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .tab-button.active {
+        border-bottom: 2px solid #3B82F6;
+        color: #3B82F6;
+        background-color: white;
+    }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+</style>
+</head>
+<body class="bg-background-light min-h-screen font-display text-gray-900">
+
+<!-- Header -->
+<header class="w-full py-6 bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-700 relative overflow-hidden shadow-xl">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute -top-4 -left-4 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div class="absolute -top-4 -right-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-cyan-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="flex items-center justify-between max-w-screen-xl mx-auto">
+            <div class="flex items-center gap-4 text-white">
+                <div class="size-10 text-white animate-pulse">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black leading-tight tracking-[-0.015em] drop-shadow-lg">ProteinPredict</h1>
+                    <p class="text-cyan-100 text-xs mt-0.5 opacity-90">AI-Powered Research Platform</p>
+                </div>
+            </div>
+            <nav class="flex items-center gap-6">
+                <a href="home.html" class="text-sm text-white/80 hover:text-white transition-colors">Home</a>
+                <a href="input.html" class="text-sm text-white/80 hover:text-white transition-colors">Predict</a>
+                <a href="database.html" class="text-sm text-white/80 hover:text-white transition-colors">Database</a>
+                <a href="advanced.html" class="text-sm font-semibold text-white border-b-2 border-white pb-0.5">Advanced</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<!-- Page Title Section -->
+<div class="bg-gray-50 border-b border-gray-200">
+    <div class="container mx-auto max-w-screen-xl px-6 py-8">
+        <div class="flex items-center gap-4">
+            <div class="grid place-items-center bg-primary-light text-primary rounded-full size-14">
+                <span class="material-symbols-outlined text-3xl">construction</span>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Advanced Tools</h2>
+                <p class="text-gray-600 mt-1">Bulk operations, protein comparison, statistics, and export tools</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<main class="max-w-screen-xl mx-auto px-6 py-6">
+    
+    <!-- Tab Navigation -->
+    <div class="border border-gray-200 bg-gray-50 mb-6 rounded-lg overflow-hidden">
+        <div class="flex">
+            <button class="tab-button active px-6 py-3 text-sm font-semibold border-b-2" onclick="switchTab('bulk')" id="tab-bulk">
+                Bulk Operations
+            </button>
+            <button class="tab-button px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 border-b-2 border-transparent" onclick="switchTab('compare')" id="tab-compare">
+                Protein Comparison
+            </button>
+            <button class="tab-button px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 border-b-2 border-transparent" onclick="switchTab('stats')" id="tab-stats">
+                Statistics
+            </button>
+            <button class="tab-button px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 border-b-2 border-transparent" onclick="switchTab('export')" id="tab-export">
+                Export Tools
+            </button>
+        </div>
+    </div>
+
+    <!-- Bulk Operations Tab -->
+    <div id="bulk-content" class="tab-content active">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- CSV Import -->
+            <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-primary-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Import Proteins from CSV</span>
+                </div>
+                <div class="p-4 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload CSV File</label>
+                        <input type="file" id="csv-file" accept=".csv" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:rounded-lg file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-blue-700 file:cursor-pointer file:transition-colors">
+                        <p class="text-xs text-gray-500 mt-1">Expected format: id, name, seq, gene, taxo</p>
+                    </div>
+                    <button onclick="handleCSVImport()" class="w-full bg-primary text-white py-2 px-4 text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                        Import Proteins
+                    </button>
+                </div>
+
+                <!-- CSV Preview -->
+                <div id="csv-preview" class="hidden p-4 border-t border-gray-200">
+                    <h4 class="font-medium text-sm mb-2">Preview:</h4>
+                    <div class="bg-gray-50 p-3 max-h-40 overflow-y-auto border border-gray-200">
+                        <pre id="csv-preview-content" class="text-xs font-mono"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-accent-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Bulk Actions</span>
+                </div>
+                <div class="p-4">
+                    <!-- Selection Info -->
+                    <div id="selection-info-bulk" class="mb-4 p-3 bg-blue-50 border border-blue-200 hidden">
+                        <p class="text-primary text-sm"><span id="selection-count">0</span> proteins selected</p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="space-y-2">
+                        <button onclick="loadProteinList()" class="w-full bg-gray-100 text-gray-800 py-2 px-4 text-sm font-medium hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors">
+                            Load Protein List
+                        </button>
+                        <button onclick="selectAllProteins()" class="w-full bg-emerald-50 text-emerald-800 py-2 px-4 text-sm font-medium hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors">
+                            Select All
+                        </button>
+                        <button onclick="clearAllSelections()" class="w-full bg-amber-50 text-amber-800 py-2 px-4 text-sm font-medium hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors">
+                            Clear Selection
+                        </button>
+                        <button onclick="BatchOperations.deleteSelected()" class="w-full bg-red-50 text-red-800 py-2 px-4 text-sm font-medium hover:bg-red-100 border border-red-200 rounded-lg transition-colors">
+                            Delete Selected
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Protein List for Bulk Operations -->
+        <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+            <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                <span class="font-semibold text-sm text-gray-800">Protein List</span>
+            </div>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left py-3 px-4 border-r border-gray-100 w-12">
+                            <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll()" class="w-4 h-4 rounded">
+                        </th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-700 border-r border-gray-100">ID</th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-700 border-r border-gray-100">Name</th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-700 border-r border-gray-100 w-24">Gene</th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-700 border-r border-gray-100 w-28">Organism</th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-700 w-24">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bulk-protein-list">
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-gray-500">
+                            Click "Load Protein List" to view proteins
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Protein Comparison Tab -->
+    <div id="compare-content" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-primary-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Compare Proteins</span>
+                </div>
+                <div class="p-4 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Protein 1 ID</label>
+                        <input type="text" id="protein1-id" placeholder="e.g., P01308" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Protein 2 ID</label>
+                        <input type="text" id="protein2-id" placeholder="e.g., P69905" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                    </div>
+                    <button onclick="performProteinComparison()" class="w-full bg-primary text-white py-2 px-4 text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                        Compare Proteins
+                    </button>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-accent-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Quick Compare</span>
+                </div>
+                <div class="p-4 space-y-4">
+                    <p class="text-gray-600 text-sm">Select from recent searches or saved proteins:</p>
+                    <select id="quick-protein1" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                        <option value="">Select Protein 1</option>
+                    </select>
+                    <select id="quick-protein2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                        <option value="">Select Protein 2</option>
+                    </select>
+                    <button onclick="quickCompare()" class="w-full bg-gray-700 text-white py-2 px-4 text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
+                        Quick Compare
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Results -->
+        <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+            <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                <span class="font-semibold text-sm text-gray-800">Comparison Results</span>
+            </div>
+            <div class="p-4" id="comparison-results">
+                <p class="text-gray-500 text-center py-8">Compare two proteins to see results here</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Tab -->
+    <div id="stats-content" class="tab-content">
+        <div class="mb-6">
+            <button onclick="loadProteinStatistics('statistics-container')" class="bg-primary text-white py-2 px-4 text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                Refresh Statistics
+            </button>
+        </div>
+
+        <div class="border border-gray-200 bg-white mb-6 rounded-lg overflow-hidden">
+            <div class="px-4 py-3 bg-primary-light border-b border-gray-200">
+                <span class="font-semibold text-sm text-gray-800">Database Overview</span>
+            </div>
+            <div class="p-4" id="statistics-container">
+                <p class="text-gray-500">Click "Refresh Statistics" to load data</p>
+            </div>
+        </div>
+
+        <!-- Additional Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-accent-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Recent Activity</span>
+                </div>
+                <div class="p-4" id="recent-activity">
+                    <p class="text-gray-500">Loading recent activity...</p>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-primary-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Saved Proteins</span>
+                </div>
+                <div class="p-4" id="saved-proteins-stats">
+                    <p class="text-gray-500">Loading saved proteins...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Tools Tab -->
+    <div id="export-content" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-primary-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Export Saved Proteins</span>
+                </div>
+                <div class="p-4 space-y-4">
+                    <p class="text-gray-600 text-sm">Export your saved proteins in different formats</p>
+                    <div class="flex gap-3">
+                        <button onclick="exportSavedProteins('json')" class="flex-1 bg-primary-light text-primary py-2 px-4 text-sm font-medium hover:bg-blue-200 border border-blue-200 rounded-lg transition-colors">
+                            Export as JSON
+                        </button>
+                        <button onclick="exportSavedProteins('csv')" class="flex-1 bg-green-50 text-green-700 py-2 px-4 text-sm font-medium hover:bg-green-100 border border-green-200 rounded-lg transition-colors">
+                            Export as CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-accent-light border-b border-gray-200">
+                    <span class="font-semibold text-sm text-gray-800">Export Search Results</span>
+                </div>
+                <div class="p-4 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Search Query</label>
+                        <input type="text" id="export-search-query" placeholder="Enter search term" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                    </div>
+                    <button onclick="exportSearchResults()" class="w-full bg-accent text-white py-2 px-4 text-sm font-medium rounded-lg hover:bg-pink-600 transition-colors">
+                        Search & Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Status -->
+        <div class="border border-gray-200 bg-white rounded-lg overflow-hidden">
+            <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                <span class="font-semibold text-sm text-gray-800">Export History</span>
+            </div>
+            <div class="p-4" id="export-history">
+                <p class="text-gray-500">No recent exports</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="w-full border-t border-gray-200/30 bg-gray-900 mt-8">
+    <div class="container mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
+            <div class="flex items-center gap-3">
+                <div class="size-5 text-gray-600">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                <p class="text-sm text-gray-600">© 2025 ProteinPredict. All rights reserved.</p>
+            </div>
+            <div class="flex gap-6">
+                <a class="text-sm text-gray-600 hover:text-accent" href="#">Documentation</a>
+                <a class="text-sm text-gray-600 hover:text-accent" href="#">Contact</a>
+                <a class="text-sm text-gray-600 hover:text-accent" href="#">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="../js/utils.js"></script>
+<script src="../js/advanced.js"></script>
+</body>
+</html>

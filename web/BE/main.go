@@ -47,8 +47,10 @@ func main() {
 	cfg, _ := config.Load()
 
 	// Initialize database connection
-	db, _ := database.NewDatabase(cfg.Database)
-
+	db, err := database.NewDatabase(cfg.Database)
+	if err != nil {
+		log.Fatal(err)
+	}
 	// Initialize dependencies
 	proteinHandler := handlers.NewProteinHandler(usecases.NewProteinUseCases(repositories.NewProteinRepository(db.Conn), services.NewProteinService()))
 
