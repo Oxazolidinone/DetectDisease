@@ -1,18 +1,29 @@
 #!/usr/bin/env python3
 """
-Simple ML service for protein analysis
-Provides basic similarity calculation and mock disease prediction
+ML Prediction Service for Protein Disease Prediction
+Loads pre-trained models (Random Forest, XGBoost, LightGBM) and provides REST API endpoints
 """
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+import joblib
 import numpy as np
+import os
+from pathlib import Path
 from Bio import Align
 from Bio.Seq import Seq
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
 import logging
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 logging.basicConfig(level=logging.INFO)
+
+# Model paths
+MODELS_DIR = Path(__file__).parent.parent / "models"
+BEST_MODEL_PATH = MODELS_DIR / "lightgbm_best.pkl"
+TOKENIZER_PATH = MODELS_DIR / "tokenizer.pkl"
+MLB_PATH = MODELS_DIR / "mlb.pkl"
 
 class ProteinMLService:
     def __init__(self):
@@ -22,16 +33,110 @@ class ProteinMLService:
         self.aligner.open_gap_score = -2
         self.aligner.extend_gap_score = -0.5
 
-        # Mock disease prediction models (in reality would be trained ML models)
-        self.disease_patterns = {
-            'Alzheimer Disease': ['GGGG', 'PPPP', 'AMYLOID'],
-            'Diabetes Mellitus Type 2': ['INSULIN', 'GLUT', 'METAB'],
-            'Cancer': ['P53', 'ONCOG', 'TUMOR'],
-            'Cardiovascular Disease': ['CARDIO', 'VESSEL', 'HEART']
-        }
+        # Load ML models
+        self.model = None
+        self.tokenizer = None
+        self.mlb = None
+        self.current_model = "lightgbm_best"
+        self.load_models()
+
+    def load_specific_model(self, model_name):
+        """Load a specific model by name"""
+        model_path = MODELS_DIR / f"{model_name}.pkl"
+
+        try:
+            if model_path.exists():
+                logging.info(f"Loading specific model: {model_name}")
+                self.model = joblib.load(model_path)
+                self.current_model = model_name
+                logging.info(f"✓ Model {model_name} loaded successfully")
+                return True
+            else:
+                logging.warning(f"Model {model_name} not found at {model_path}")
+                return False
+        except Exception as e:
+            logging.error(f"Error loading model {model_name}: {e}")
+            return False
+
+    def load_models(self):
+        try:
+            if BEST_MODEL_PATH.exists():
+                logging.info(f"Loading model from: {BEST_MODEL_PATH}")
+                self.model = joblib.load(BEST_MODEL_PATH)
+                self.current_model = "lightgbm_best"
+                logging.info("✓ Model loaded successfully")
+            else:
+                logging.warning(f"Best model not found at {BEST_MODEL_PATH}")
+                alternatives = [
+                    MODELS_DIR / "xgboost.pkl",
+                    MODELS_DIR / "random_forest.pkl",
+                    MODELS_DIR / "lightgbm.pkl"
+                ]
+                for alt_path in alternatives:
+                    if alt_path.exists():
+                        logging.info(f"Loading alternative model from: {alt_path}")
+                        self.model = joblib.load(alt_path)
+                        logging.info("✓ Alternative model loaded successfully")
+                        break
+
+            # Load tokenizer (for sequence preprocessing)
+            if TOKENIZER_PATH.exists():
+                logging.info(f"Loading tokenizer from: {TOKENIZER_PATH}")
+                self.tokenizer = joblib.load(TOKENIZER_PATH)
+                logging.info("✓ Tokenizer loaded successfully")
+            else:
+                logging.warning(f"Tokenizer not found at {TOKENIZER_PATH}")
+
+            # Load MultiLabelBinarizer (for decoding predictions)
+            if MLB_PATH.exists():
+                logging.info(f"Loading label encoder from: {MLB_PATH}")
+                self.mlb = joblib.load(MLB_PATH)
+                logging.info("✓ Label encoder loaded successfully")
+                logging.info(f"  Total disease classes: {len(self.mlb.classes_)}")
+            else:
+                logging.warning(f"Label encoder not found at {MLB_PATH}")
+
+            logging.info("=" * 60)
+            if self.model:
+                logging.info("Models loaded successfully!")
+            else:
+                logging.warning("No models loaded - will use fallback predictions")
+            logging.info("=" * 60)
+
+        except Exception as e:
+            logging.error(f"ERROR loading models: {str(e)}")
+            logging.warning("Continuing with fallback predictions")
+
+    def preprocess_sequence(self, sequence):
+        cleaned_sequence = sequence.replace('\n', '').replace('\r', '').replace(' ', '')
+
+        # Remove FASTA header if present
+        if '>' in cleaned_sequence:
+            lines = cleaned_sequence.split('>')
+            cleaned_sequence = ''.join([line.split('\n', 1)[-1] if '\n' in line else line for line in lines if line])
+
+        cleaned_sequence = cleaned_sequence.upper().strip()
+
+        # Use tokenizer if available
+        if self.tokenizer is not None:
+            try:
+                features = self.tokenizer.transform([cleaned_sequence])
+                return features
+            except Exception as e:
+                logging.error(f"Tokenizer error: {e}")
+
+        # Fallback: Basic k-mer encoding (3-mer by default)
+        k = 3
+        kmers = [cleaned_sequence[i:i+k] for i in range(len(cleaned_sequence) - k + 1)]
+        unique_kmers = set(kmers)
+        feature_vector = np.zeros(1000)
+
+        for i, kmer in enumerate(list(unique_kmers)[:1000]):
+            feature_vector[i] = kmers.count(kmer)
+
+        return feature_vector.reshape(1, -1)
 
     def calculate_similarity(self, seq1, seq2):
-        """Calculate sequence similarity using alignment score"""
         try:
             alignments = self.aligner.align(seq1, seq2)
             best_alignment = max(alignments, key=lambda x: x.score)
@@ -46,8 +151,54 @@ class ProteinMLService:
             return 0.0
 
     def predict_disease(self, sequence):
-        """Mock disease prediction based on simple pattern matching"""
         predictions = []
+
+        # Try using the loaded ML model
+        if self.model is not None and self.mlb is not None:
+            try:
+                features = self.preprocess_sequence(sequence)
+
+                # Make prediction
+                if hasattr(self.model, 'predict_proba'):
+                    predictions_proba = self.model.predict_proba(features)
+                    predictions_binary = self.model.predict(features)
+                else:
+                    predictions_binary = self.model.predict(features)
+                    predictions_proba = None
+
+                # Decode predictions
+                if isinstance(predictions_proba, list):
+                    # Handle multi-output format (list of arrays)
+                    for i, class_name in enumerate(self.mlb.classes_):
+                        if i < len(predictions_proba):
+                            proba = predictions_proba[i][0][1] if len(predictions_proba[i][0]) > 1 else predictions_proba[i][0][0]
+                            if predictions_binary[0][i] == 1 or proba > 0.3:
+                                predictions.append({
+                                    'disease': str(class_name),
+                                    'confidence': float(proba)
+                                })
+                else:
+                    # Binary predictions
+                    for i, class_name in enumerate(self.mlb.classes_):
+                        if i < len(predictions_binary[0]) and predictions_binary[0][i] == 1:
+                            predictions.append({
+                                'disease': str(class_name),
+                                'confidence': 0.85
+                            })
+
+                predictions.sort(key=lambda x: x['confidence'], reverse=True)
+                return predictions[:20]
+
+            except Exception as e:
+                logging.error(f"ML prediction error: {e}")
+                logging.info("Falling back to pattern-based predictions")
+
+        disease_patterns = {
+            'Alzheimer Disease': ['GGGG', 'PPPP', 'AMYLOID'],
+            'Diabetes Mellitus Type 2': ['INSULIN', 'GLUT', 'METAB'],
+            'Cancer': ['P53', 'ONCOG', 'TUMOR'],
+            'Cardiovascular Disease': ['CARDIO', 'VESSEL', 'HEART']
+        }
         sequence_upper = sequence.upper()
 
         try:
@@ -55,7 +206,7 @@ class ProteinMLService:
             analysis = ProteinAnalysis(sequence)
             molecular_weight = analysis.molecular_weight()
 
-            for disease, patterns in self.disease_patterns.items():
+            for disease, patterns in disease_patterns.items():
                 score = 0.0
                 evidence = []
 
@@ -84,9 +235,8 @@ class ProteinMLService:
 
                 if score > 0.1:  # Only include if there's some indication
                     predictions.append({
-                        'disease_name': disease,
-                        'probability': round(score, 3),
-                        'confidence_score': round(min(score * 1.2, 1.0), 3),
+                        'disease': disease,
+                        'confidence': round(score, 3),
                         'evidence': '; '.join(evidence) if evidence else 'Statistical correlation'
                     })
 
@@ -94,9 +244,9 @@ class ProteinMLService:
             logging.error(f"Error predicting disease: {e}")
             return []
 
-        # Sort by probability
-        predictions.sort(key=lambda x: x['probability'], reverse=True)
-        return predictions[:5]  # Return top 5
+        # Sort by confidence
+        predictions.sort(key=lambda x: x['confidence'], reverse=True)
+        return predictions[:20]  # Return top 20
 
     def align_sequences(self, seq1, seq2):
         """Perform sequence alignment"""
@@ -139,11 +289,19 @@ def predict_disease():
         if not sequence:
             return jsonify({'error': 'Empty sequence'}), 400
 
+        # Get model selection (optional)
+        model_name = data.get('model', 'lightgbm_best')
+
+        # Load specific model if requested
+        if model_name and model_name != 'default':
+            ml_service.load_specific_model(model_name)
+
         predictions = ml_service.predict_disease(sequence)
 
         return jsonify({
             'predictions': predictions,
-            'sequence_length': len(sequence)
+            'sequence_length': len(sequence),
+            'model_used': getattr(ml_service, 'current_model', 'unknown')
         })
 
     except Exception as e:
