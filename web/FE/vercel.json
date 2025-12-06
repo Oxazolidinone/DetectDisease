@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "public": true,
+  "rewrites": [
+    { "source": "/", "destination": "/html/home.html" },
+    { "source": "/home", "destination": "/html/home.html" },
+    { "source": "/input", "destination": "/html/input.html" },
+    { "source": "/database", "destination": "/html/database.html" },
+    { "source": "/advanced", "destination": "/html/advanced.html" },
+    { "source": "/result", "destination": "/html/result.html" }
+  ],
+  "headers": [
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

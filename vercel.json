@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/web/FE/html/home.html" },
+    { "source": "/home", "destination": "/web/FE/html/home.html" },
+    { "source": "/input", "destination": "/web/FE/html/input.html" },
+    { "source": "/database", "destination": "/web/FE/html/database.html" },
+    { "source": "/advanced", "destination": "/web/FE/html/advanced.html" },
+    { "source": "/result", "destination": "/web/FE/html/result.html" }
+  ]
+}
