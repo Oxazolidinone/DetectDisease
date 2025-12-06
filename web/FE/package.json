@@ -11,10 +11,15 @@
     "preview": "http-server . -p 4173 -a 0.0.0.0"
   },
   "devDependencies": {
-    "live-server": "^1.2.2",
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.0"
   },
-  "keywords": ["frontend", "protein", "disease", "prediction"],
+  "keywords": [
+    "frontend",
+    "protein",
+    "disease",
+    "prediction"
+  ],
   "author": "DetectDisease Team",
   "license": "MIT",
   "browserslist": [

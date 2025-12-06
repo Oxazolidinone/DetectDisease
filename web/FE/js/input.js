@@ -302,9 +302,9 @@ async function handlePredictClick() {
             seq: [sequence],
             // Optional properties
             length: document.getElementById('protein-length')?.value || sequence.length,
-            mw: parseFloat(document.getElementById('molecular-weight')?.value) || null,
+            // mw: parseFloat(document.getElementById('molecular-weight')?.value) || null,
             pi: parseFloat(document.getElementById('pi-value')?.value) || null,
-            net_charge: parseFloat(document.getElementById('net-charge')?.value) || null,
+            // net_charge: parseFloat(document.getElementById('net-charge')?.value) || null,
             hydrophobicity: parseFloat(document.getElementById('hydrophobicity')?.value) || null,
             n_interactors: parseInt(document.getElementById('interactors')?.value) || null,
             taxo: document.getElementById('organism')?.value || '',
@@ -346,9 +346,9 @@ async function handlePredictClick() {
             // Additional properties
             properties: {
                 length: proteinData.length,
-                molecular_weight: proteinData.mw,
+                // molecular_weight: proteinData.mw,
                 pi: proteinData.pi,
-                net_charge: proteinData.net_charge,
+                // net_charge: proteinData.net_charge,
                 hydrophobicity: proteinData.hydrophobicity,
                 interactors: proteinData.n_interactors,
                 organism: proteinData.taxo,
