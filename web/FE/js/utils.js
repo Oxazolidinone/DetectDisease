@@ -2,13 +2,30 @@
  * Utility functions shared across all pages
  */
 
-// API Base URLs - Auto-detect environment
-const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_BASE_URL = isLocalDevelopment
-    ? 'http://localhost:8080/api/v1'
-    : `${CONFIG.API_BASE_URL}/api/v1`;
-// All ML requests now go through Backend (no direct ML service calls)
-const ML_API_BASE_URL = API_BASE_URL;
+// Wait for CONFIG to be loaded, then set API URLs
+let API_BASE_URL;
+let ML_API_BASE_URL;
+
+// Initialize API URLs
+function initializeApiUrls() {
+    const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    if (isLocalDevelopment) {
+        API_BASE_URL = 'http://localhost:8080/api/v1';
+    } else if (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) {
+        API_BASE_URL = `${CONFIG.API_BASE_URL}/api/v1`;
+    } else {
+        // Fallback
+        console.warn('CONFIG not loaded, using fallback API URL');
+        API_BASE_URL = `${window.location.origin}/api/v1`;
+    }
+    
+    // All ML requests now go through Backend (no direct ML service calls)
+    ML_API_BASE_URL = API_BASE_URL;
+}
+
+// Initialize immediately
+initializeApiUrls();
 
 /**
  * Show notification message
