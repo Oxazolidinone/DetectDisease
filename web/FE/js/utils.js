@@ -69,6 +69,7 @@ async function apiCall(endpoint, options = {}) {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             headers: {
                 'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true',
                 ...options.headers
             },
             ...options
@@ -93,6 +94,7 @@ async function mlApiCall(endpoint, options = {}) {
         const response = await fetch(`${ML_API_BASE_URL}${endpoint}`, {
             headers: {
                 'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true',
                 ...options.headers
             },
             ...options
