@@ -45,28 +45,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  frontend:
-    build:
-      context: ./web/FE
-      dockerfile: Dockerfile
-    container_name: protein_frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./web/FE/html:/app/html
-      - ./web/FE/css:/app/css
-      - ./web/FE/js:/app/js
-      - node_modules:/app/node_modules
-    environment:
-      - NODE_ENV=development
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   ml_service:
     build:
       context: ./ml

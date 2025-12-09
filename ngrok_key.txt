@@ -1,0 +1,16 @@
+#########ssh key for ngrok#########
+
+3RMNJQQXUX
+4XX7HWY4QC
+5H357RCBQQ
+NJUDWSTJZF
+NZA6NNERV7
+XYU3NJV2H6
+UHX6SEUEGS
+XPVE2NB8XG
+VJQUCQ9MGV
+V9JY93J9AW
+
+
+##########ngrok api key############
+36arikEcn3o9oU5GazDjseCLHBc_3b5Cc8C2Fz8PkqTsRKm1m

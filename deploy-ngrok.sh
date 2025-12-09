@@ -1,0 +1,254 @@
+#!/bin/bash
+
+# ============================================================================
+# DetectDisease - Auto Deploy Script
+# ============================================================================
+# Automatically start Docker services, create ngrok tunnels, 
+# and deploy to GitHub with updated URLs
+# ============================================================================
+
+set -e  # Exit on error
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Symbols
+SUCCESS="✓"
+FAILURE="✗"
+INFO="ℹ"
+ROCKET="🚀"
+GLOBE="🌐"
+GEAR="⚙"
+
+# Print header
+print_header() {
+    echo -e "${CYAN}"
+    echo "╔════════════════════════════════════════════════════════════╗"
+    echo "║                 DetectDisease Deploy Script                ║"
+    echo "║              Ngrok Tunnels + Auto Deployment               ║"
+    echo "╚════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
+}
+
+# Print step
+print_step() {
+    echo -e "${BLUE}${GEAR}${NC} $1"
+}
+
+# Print success
+print_success() {
+    echo -e "${GREEN}${SUCCESS}${NC} $1"
+}
+
+# Print error
+print_error() {
+    echo -e "${RED}${FAILURE}${NC} $1"
+}
+
+# Print info
+print_info() {
+    echo -e "${YELLOW}${INFO}${NC} $1"
+}
+
+# Cleanup function
+cleanup() {
+    echo ""
+    print_step "Cleaning up ngrok processes..."
+    kill $NGROK_PID 2>/dev/null || true
+    pkill -f ngrok 2>/dev/null || true
+    rm -f /tmp/ngrok-config.yml
+    print_success "Cleanup complete"
+    exit 0
+}
+
+# Trap Ctrl+C for cleanup
+trap cleanup INT TERM
+
+# ============================================================================
+# Main Script
+# ============================================================================
+
+print_header
+
+# Step 1: Start Docker services
+print_step "Starting Docker services (Backend + ML)..."
+docker-compose up -d postgres web ml_service
+sleep 2
+
+# Check if containers are running
+if docker ps | grep -q "protein_web" && docker ps | grep -q "protein_ml"; then
+    print_success "Docker services started successfully"
+else
+    print_error "Failed to start Docker services"
+    exit 1
+fi
+
+echo ""
+
+# Step 2: Start ngrok tunnels
+print_step "Initializing ngrok tunnels..."
+
+# Kill any existing ngrok processes
+pkill -f ngrok 2>/dev/null || true
+sleep 2
+
+# Create ngrok config file with multiple tunnels
+print_step "Creating ngrok configuration..."
+
+# Get authtoken from existing config
+NGROK_AUTHTOKEN=$(grep "authtoken:" "$HOME/Library/Application Support/ngrok/ngrok.yml" 2>/dev/null | awk '{print $2}' || echo "")
+
+if [ -z "$NGROK_AUTHTOKEN" ]; then
+    print_error "Ngrok authtoken not found. Please run: ngrok config add-authtoken YOUR_TOKEN"
+    exit 1
+fi
+
+cat > /tmp/ngrok-config.yml << NGROK_EOF
+version: "2"
+authtoken: $NGROK_AUTHTOKEN
+web_addr: localhost:4040
+tunnels:
+  backend:
+    proto: http
+    addr: 8080
+  mlservice:
+    proto: http
+    addr: 5001
+NGROK_EOF
+
+echo -e "  ${CYAN}→${NC} Starting all tunnels (Backend + ML Service)"
+ngrok start --all --config /tmp/ngrok-config.yml --log=stdout > /tmp/ngrok.log 2>&1 &
+NGROK_PID=$!
+sleep 8
+
+print_success "Ngrok tunnels initiated"
+
+echo ""
+
+# Step 3: Retrieve ngrok URLs with retry
+print_step "Retrieving ngrok public URLs..."
+
+# Wait for ngrok API to be ready
+for i in {1..15}; do
+    if curl -s http://localhost:4040/api/tunnels > /dev/null 2>&1; then
+        break
+    fi
+    echo -e "  ${YELLOW}→${NC} Waiting for ngrok API... ($i/15)"
+    sleep 2
+done
+
+# Get both URLs from single API endpoint
+TUNNELS_JSON=$(curl -s http://localhost:4040/api/tunnels)
+BE_URL=$(echo "$TUNNELS_JSON" | grep -o '"public_url":"https://[^"]*"' | grep -v ".ngrok.io" | head -1 | cut -d'"' -f4)
+ML_URL=$(echo "$TUNNELS_JSON" | grep -o '"public_url":"https://[^"]*"' | grep -v ".ngrok.io" | tail -1 | cut -d'"' -f4)
+
+# If still empty, try alternative parsing
+if [ -z "$BE_URL" ]; then
+    BE_URL=$(echo "$TUNNELS_JSON" | jq -r '.tunnels[] | select(.name=="backend") | .public_url' 2>/dev/null)
+fi
+if [ -z "$ML_URL" ]; then
+    ML_URL=$(echo "$TUNNELS_JSON" | jq -r '.tunnels[] | select(.name=="mlservice") | .public_url' 2>/dev/null)
+fi
+
+# Debug output
+if [ -z "$BE_URL" ] || [ -z "$ML_URL" ]; then
+    print_error "Failed to parse URLs. Full response:"
+    echo "$TUNNELS_JSON" | jq '.' 2>/dev/null || echo "$TUNNELS_JSON"
+fi
+
+if [ -z "$BE_URL" ] || [ -z "$ML_URL" ]; then
+    print_error "Failed to retrieve ngrok URLs"
+    echo -e "  Backend URL: ${YELLOW}${BE_URL:-Not found}${NC}"
+    echo -e "  ML URL: ${YELLOW}${ML_URL:-Not found}${NC}"
+    cleanup
+fi
+
+echo -e "  ${GREEN}Backend:${NC}    $BE_URL"
+echo -e "  ${GREEN}ML Service:${NC} $ML_URL"
+
+echo ""
+
+# Step 4: Update config.js
+CONFIG_FILE="web/FE/js/config.js"
+print_step "Updating configuration file..."
+echo -e "  ${CYAN}→${NC} ${CONFIG_FILE}"
+
+cat > "$CONFIG_FILE" << EOF
+// API Configuration
+// Auto-generated by deploy script - DO NOT EDIT MANUALLY
+
+const CONFIG = {
+    // Backend API URL - Ngrok URL for Backend (Go server on port 8080)
+    API_BASE_URL: window.location.hostname === 'localhost' 
+        ? 'http://localhost:8080'
+        : '$BE_URL',
+    
+    // ML Service URL - Ngrok URL for ML Service (Python Flask on port 5001)
+    ML_BASE_URL: window.location.hostname === 'localhost'
+        ? 'http://localhost:5001'
+        : '$ML_URL',
+    
+    // API Endpoints
+    ENDPOINTS: {
+        PREDICT: '/api/predict',
+        SIMILARITY: '/api/similarity',
+        ALIGN: '/api/align',
+        PROTEINS: '/api/proteins',
+        HEALTH: '/health'
+    }
+};
+
+// Export for use in other files
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CONFIG;
+}
+EOF
+
+print_success "Configuration updated successfully"
+
+echo ""
+
+# Step 5: Deploy to GitHub
+print_step "Deploying to GitHub..."
+git add "$CONFIG_FILE"
+
+if git diff --staged --quiet; then
+    print_info "No changes to commit"
+else
+    git commit -m "chore: auto-update ngrok URLs [skip ci]" -m "Backend: $BE_URL" -m "ML Service: $ML_URL"
+    git push
+    print_success "Deployed to GitHub successfully"
+    print_info "Vercel will auto-deploy the frontend"
+fi
+
+echo ""
+echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║                   Deployment Complete!                     ║${NC}"
+echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
+echo ""
+echo -e "${GREEN}${GLOBE} Active Ngrok Tunnels:${NC}"
+echo -e "  ${CYAN}Backend (Go):${NC}        $BE_URL"
+echo -e "  ${CYAN}ML Service (Flask):${NC}  $ML_URL"
+echo ""
+echo -e "${GREEN}${ROCKET} Service Status:${NC}"
+echo -e "  ${CYAN}Docker Containers:${NC}   Running"
+echo -e "  ${CYAN}Ngrok Tunnels:${NC}       Active"
+echo -e "  ${CYAN}Frontend Deploy:${NC}     Vercel (auto-deploying)"
+echo ""
+echo -e "${YELLOW}⚠  Important:${NC}"
+echo -e "  • Keep this terminal open to maintain tunnels"
+echo -e "  • Press ${YELLOW}Ctrl+C${NC} to stop ngrok and cleanup"
+echo -e "  • Ngrok URLs change on restart (free tier)"
+echo ""
+echo -e "${BLUE}${INFO} Dashboard URLs:${NC}"
+echo -e "  • Ngrok Dashboard: http://localhost:4040"
+echo ""
+
+# Keep script running
+print_info "Monitoring tunnels... (Press Ctrl+C to exit)"
+wait $NGROK_PID
