@@ -7,16 +7,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetUpRoutes(r *gin.Engine, proteinHandler *handlers.ProteinHandler) {
+func SetUpRoutes(r *gin.Engine, proteinHandler *handlers.ProteinHandler, mlHandler *handlers.MLHandler) {
 	r.Use(CORSMiddleware())
 	r.Use(ErrorHandlingMiddleware())
 
 	r.GET("/health", http.HealthCheck())
 	r.GET("/ready", http.ReadinessCheck())
 
-	api := r.Group("/api/v1")
+	api := r.Group("/api")
 	{
-		proteins := api.Group("/proteins")
+		// ML Service Proxy Routes
+		api.POST("/predict", mlHandler.PredictDisease)
+		api.POST("/similarity", mlHandler.CalculateSimilarity)
+		api.POST("/align", mlHandler.AlignSequences)
+		api.GET("/ml/health", mlHandler.HealthCheck)
+	}
+
+	apiV1 := r.Group("/api/v1")
+	{
+		proteins := apiV1.Group("/proteins")
 		{
 			proteins.GET("", proteinHandler.SearchProteins)
 			proteins.POST("", proteinHandler.CreateProtein)

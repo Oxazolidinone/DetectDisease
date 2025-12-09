@@ -51,6 +51,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
+	// Initialize ML Handler (proxy to ML service)
+	mlServiceURL := os.Getenv("ML_SERVICE_URL")
+	if mlServiceURL == "" {
+		mlServiceURL = "http://ml_service:5001" // Default Docker internal URL
+	}
+	mlHandler := handlers.NewMLHandler(mlServiceURL)
+	
 	// Initialize dependencies
 	proteinHandler := handlers.NewProteinHandler(usecases.NewProteinUseCases(repositories.NewProteinRepository(db.Conn), services.NewProteinService()))
 
@@ -59,7 +67,7 @@ func main() {
 	router := gin.Default()
 
 	// Setup routes
-	api.SetUpRoutes(router, proteinHandler)
+	api.SetUpRoutes(router, proteinHandler, mlHandler)
 
 	// Setup Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

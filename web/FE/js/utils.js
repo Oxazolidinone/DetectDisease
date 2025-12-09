@@ -6,10 +6,9 @@
 const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const API_BASE_URL = isLocalDevelopment
     ? 'http://localhost:8080/api/v1'
-    : `http://${window.location.hostname}:8080/api/v1`;
-const ML_API_BASE_URL = isLocalDevelopment
-    ? 'http://localhost:5001'
-    : `http://${window.location.hostname}:5001`;
+    : `${CONFIG.API_BASE_URL}/api/v1`;
+// All ML requests now go through Backend (no direct ML service calls)
+const ML_API_BASE_URL = API_BASE_URL;
 
 /**
  * Show notification message

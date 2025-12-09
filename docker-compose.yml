@@ -36,12 +36,14 @@ services:
       - DB_PASSWORD=password
       - DB_DATABASE=postgres
       - DB_SSL_MODE=disable
-      - ML_BASE_URL=http://ml_service:5000
+      - ML_SERVICE_URL=http://ml_service:5000
       - ML_TIMEOUT=30
     ports:
       - "8080:8080"
     depends_on:
       postgres:
+        condition: service_healthy
+      ml_service:
         condition: service_healthy
     restart: unless-stopped
 
