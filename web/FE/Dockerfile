@@ -1,14 +1,18 @@
 # Use Node.js as base image
 FROM node:18-alpine
 
+# Install wget for health check
+RUN apk add --no-cache wget
+
 # Set working directory
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (both local and global)
+RUN npm install && \
+    npm install -g live-server http-server
 
 # Copy all frontend files
 COPY . .
