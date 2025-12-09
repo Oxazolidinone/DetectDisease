@@ -12,16 +12,16 @@ function initializeApiUrls() {
     
     if (isLocalDevelopment) {
         API_BASE_URL = 'http://localhost:8080/api/v1';
+        ML_API_BASE_URL = 'http://localhost:8080'; // ML endpoints at /api/predict (no /v1)
     } else if (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) {
         API_BASE_URL = `${CONFIG.API_BASE_URL}/api/v1`;
+        ML_API_BASE_URL = CONFIG.API_BASE_URL; // ML endpoints directly on base URL
     } else {
         // Fallback
         console.warn('CONFIG not loaded, using fallback API URL');
         API_BASE_URL = `${window.location.origin}/api/v1`;
+        ML_API_BASE_URL = window.location.origin;
     }
-    
-    // All ML requests now go through Backend (no direct ML service calls)
-    ML_API_BASE_URL = API_BASE_URL;
 }
 
 // Initialize immediately
@@ -113,7 +113,7 @@ async function mlApiCall(endpoint, options = {}) {
  * Predict disease using ML service
  */
 async function predictDisease(sequence, model = 'lightgbm_best') {
-    return await mlApiCall('/predict/disease', {
+    return await mlApiCall('/api/predict', {
         method: 'POST',
         body: JSON.stringify({
             sequence: sequence,
@@ -126,7 +126,7 @@ async function predictDisease(sequence, model = 'lightgbm_best') {
  * Calculate sequence similarity using ML service
  */
 async function calculateSimilarity(sequence1, sequence2) {
-    return await mlApiCall('/similarity', {
+    return await mlApiCall('/api/similarity', {
         method: 'POST',
         body: JSON.stringify({ sequence1, sequence2 })
     });
@@ -136,7 +136,7 @@ async function calculateSimilarity(sequence1, sequence2) {
  * Align sequences using ML service
  */
 async function alignSequences(sequence1, sequence2) {
-    return await mlApiCall('/align', {
+    return await mlApiCall('/api/align', {
         method: 'POST',
         body: JSON.stringify({ sequence1, sequence2 })
     });
