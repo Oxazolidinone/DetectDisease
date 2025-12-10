@@ -134,29 +134,33 @@ func (p *ProteinService) CalculateMolecularWeight(sequence string) float64 {
 }
 
 func (p *ProteinService) CalculateIsoelectricPoint(sequence string) float64 {
-	pKValues := map[rune]float64{
-		'C': 8.5, 'D': 3.9, 'E': 4.2, 'H': 6.0, 'K': 10.5, 'R': 12.5, 'Y': 10.1,
-	}
+	// pKValues := map[rune]float64{
+	// 	'C': 8.5, 'D': 3.9, 'E': 4.2, 'H': 6.0, 'K': 10.5, 'R': 12.5, 'Y': 10.1,
+	// }
 
-	counts := make(map[rune]int)
-	for _, aa := range strings.ToUpper(sequence) {
-		counts[aa]++
-	}
+	// counts := make(map[rune]int)
+	// for _, aa := range strings.ToUpper(sequence) {
+	// 	counts[aa]++
+	// }
 
-	ph := 7.0
-	for i := 0; i < 100; i++ {
-		charge := p.calculateChargeAtPH(ph, counts, pKValues)
-		if math.Abs(charge) < 0.01 {
-			break
-		}
-		if charge > 0 {
-			ph += 0.1
-		} else {
-			ph -= 0.1
-		}
-	}
+	// ph := 7.0
+	// for i := 0; i < 100; i++ {
+	// 	charge := p.calculateChargeAtPH(ph, counts, pKValues)
+	// 	if math.Abs(charge) < 0.01 {
+	// 		break
+	// 	}
+	// 	if charge > 0 {
+	// 		ph += 0.1
+	// 	} else {
+	// 		ph -= 0.1
+	// 	}
+	// }
+	result, err := pythonbiopy.Compute(sequence)
+    if err != nil {
+        return 0
+    }
+    return result.PI
 
-	return ph
 }
 
 func (p *ProteinService) calculateChargeAtPH(ph float64, counts map[rune]int, pKValues map[rune]float64) float64 {
@@ -178,28 +182,33 @@ func (p *ProteinService) calculateChargeAtPH(ph float64, counts map[rune]int, pK
 }
 
 func (p *ProteinService) CalculateHydrophobicity(sequence string) float64 {
-	hydrophobicity := map[rune]float64{
-		'A': 1.8, 'R': -4.5, 'N': -3.5, 'D': -3.5, 'C': 2.5,
-		'E': -3.5, 'Q': -3.5, 'G': -0.4, 'H': -3.2, 'I': 4.5,
-		'L': 3.8, 'K': -3.9, 'M': 1.9, 'F': 2.8, 'P': -1.6,
-		'S': -0.8, 'T': -0.7, 'W': -0.9, 'Y': -1.3, 'V': 4.2,
-	}
+	// hydrophobicity := map[rune]float64{
+	// 	'A': 1.8, 'R': -4.5, 'N': -3.5, 'D': -3.5, 'C': 2.5,
+	// 	'E': -3.5, 'Q': -3.5, 'G': -0.4, 'H': -3.2, 'I': 4.5,
+	// 	'L': 3.8, 'K': -3.9, 'M': 1.9, 'F': 2.8, 'P': -1.6,
+	// 	'S': -0.8, 'T': -0.7, 'W': -0.9, 'Y': -1.3, 'V': 4.2,
+	// }
 
-	totalHydrophobicity := 0.0
-	validCount := 0
+	// totalHydrophobicity := 0.0
+	// validCount := 0
 
-	for _, aa := range strings.ToUpper(sequence) {
-		if value, exists := hydrophobicity[aa]; exists {
-			totalHydrophobicity += value
-			validCount++
-		}
-	}
+	// for _, aa := range strings.ToUpper(sequence) {
+	// 	if value, exists := hydrophobicity[aa]; exists {
+	// 		totalHydrophobicity += value
+	// 		validCount++
+	// 	}
+	// }
 
-	if validCount == 0 {
-		return 0.0
-	}
+	// if validCount == 0 {
+	// 	return 0.0
+	// }
 
-	return totalHydrophobicity / float64(validCount)
+	// return totalHydrophobicity / float64(validCount)
+	result, err := pythonbiopy.Compute(seq)
+    if err != nil {
+        return 0
+    }
+    return result.Gravy
 }
 
 func min(a, b int) int {
