@@ -79,33 +79,28 @@ class ProteinMLService:
                         logging.info("✓ Alternative model loaded successfully")
                         break
 
-            # Load tokenizer (for sequence preprocessing)
-            if TOKENIZER_PATH.exists():
-                logging.info(f"Loading tokenizer from: {TOKENIZER_PATH}")
-                self.tokenizer = joblib.load(TOKENIZER_PATH)
-                logging.info("✓ Tokenizer loaded successfully")
-            else:
-                logging.warning(f"Tokenizer not found at {TOKENIZER_PATH}")
+            # Skip tokenizer - use k-mer encoding instead
+            logging.info("Using k-mer feature extraction (tokenizer skipped)")
 
             # Load MultiLabelBinarizer (for decoding predictions)
             if MLB_PATH.exists():
                 logging.info(f"Loading label encoder from: {MLB_PATH}")
                 self.mlb = joblib.load(MLB_PATH)
                 logging.info("✓ Label encoder loaded successfully")
-                logging.info(f"  Total disease classes: {len(self.mlb.classes_)}")
+                logging.info(f"  Total protein function classes: {len(self.mlb.classes_)}")
             else:
                 logging.warning(f"Label encoder not found at {MLB_PATH}")
 
             logging.info("=" * 60)
-            if self.model:
+            if self.model and self.mlb:
                 logging.info("Models loaded successfully!")
             else:
-                logging.warning("No models loaded - will use fallback predictions")
+                logging.warning("Models incomplete - predictions may be limited")
             logging.info("=" * 60)
 
         except Exception as e:
             logging.error(f"ERROR loading models: {str(e)}")
-            logging.warning("Continuing with fallback predictions")
+            logging.warning("Continuing with limited functionality")
 
     def preprocess_sequence(self, sequence):
         cleaned_sequence = sequence.replace('\n', '').replace('\r', '').replace(' ', '')
@@ -117,15 +112,7 @@ class ProteinMLService:
 
         cleaned_sequence = cleaned_sequence.upper().strip()
 
-        # Use tokenizer if available
-        if self.tokenizer is not None:
-            try:
-                features = self.tokenizer.transform([cleaned_sequence])
-                return features
-            except Exception as e:
-                logging.error(f"Tokenizer error: {e}")
-
-        # Fallback: Basic k-mer encoding (3-mer by default)
+        # Use k-mer encoding (3-mer)
         k = 3
         kmers = [cleaned_sequence[i:i+k] for i in range(len(cleaned_sequence) - k + 1)]
         unique_kmers = set(kmers)
@@ -151,6 +138,7 @@ class ProteinMLService:
             return 0.0
 
     def predict_disease(self, sequence):
+        """Predict protein functions (not diseases - naming is legacy)"""
         predictions = []
 
         # Try using the loaded ML model
@@ -166,7 +154,7 @@ class ProteinMLService:
                     predictions_binary = self.model.predict(features)
                     predictions_proba = None
 
-                # Decode predictions
+                # Decode predictions using MLB
                 if isinstance(predictions_proba, list):
                     # Handle multi-output format (list of arrays)
                     for i, class_name in enumerate(self.mlb.classes_):
@@ -174,79 +162,44 @@ class ProteinMLService:
                             proba = predictions_proba[i][0][1] if len(predictions_proba[i][0]) > 1 else predictions_proba[i][0][0]
                             if predictions_binary[0][i] == 1 or proba > 0.3:
                                 predictions.append({
-                                    'disease': str(class_name),
-                                    'confidence': float(proba)
+                                    'disease': str(class_name),  # Legacy field name - actually protein function
+                                    'confidence': float(proba),
+                                    'evidence': 'ML model prediction'
                                 })
                 else:
                     # Binary predictions
                     for i, class_name in enumerate(self.mlb.classes_):
                         if i < len(predictions_binary[0]) and predictions_binary[0][i] == 1:
+                            # Get probability if available
+                            if predictions_proba is not None and i < predictions_proba.shape[1]:
+                                proba = float(predictions_proba[0][i])
+                            else:
+                                proba = 0.85
+                            
                             predictions.append({
-                                'disease': str(class_name),
-                                'confidence': 0.85
+                                'disease': str(class_name),  # Legacy field name - actually protein function
+                                'confidence': proba,
+                                'evidence': 'ML model prediction'
                             })
 
                 predictions.sort(key=lambda x: x['confidence'], reverse=True)
+                logging.info(f"Predicted {len(predictions)} protein functions for sequence")
                 return predictions[:20]
 
             except Exception as e:
-                logging.error(f"ML prediction error: {e}")
-                logging.info("Falling back to pattern-based predictions")
-
-        disease_patterns = {
-            'Alzheimer Disease': ['GGGG', 'PPPP', 'AMYLOID'],
-            'Diabetes Mellitus Type 2': ['INSULIN', 'GLUT', 'METAB'],
-            'Cancer': ['P53', 'ONCOG', 'TUMOR'],
-            'Cardiovascular Disease': ['CARDIO', 'VESSEL', 'HEART']
-        }
-        sequence_upper = sequence.upper()
-
-        try:
-            # Calculate basic protein properties
-            analysis = ProteinAnalysis(sequence)
-            molecular_weight = analysis.molecular_weight()
-
-            for disease, patterns in disease_patterns.items():
-                score = 0.0
-                evidence = []
-
-                # Pattern matching
-                for pattern in patterns:
-                    if pattern in sequence_upper:
-                        score += 0.2
-                        evidence.append(f"Contains {pattern} motif")
-
-                # Length-based scoring (mock)
-                if disease == 'Alzheimer Disease' and len(sequence) > 300:
-                    score += 0.1
-                    evidence.append("Large protein associated with neurodegeneration")
-                elif disease == 'Diabetes Mellitus Type 2' and 50 < len(sequence) < 200:
-                    score += 0.1
-                    evidence.append("Medium-sized protein in metabolic pathway")
-
-                # Molecular weight-based scoring (mock)
-                if molecular_weight > 50000 and disease == 'Cancer':
-                    score += 0.1
-                    evidence.append("High molecular weight associated with tumor suppression")
-
-                # Add some randomness for demonstration
-                score += np.random.uniform(0, 0.3)
-                score = min(1.0, score)
-
-                if score > 0.1:  # Only include if there's some indication
-                    predictions.append({
-                        'disease': disease,
-                        'confidence': round(score, 3),
-                        'evidence': '; '.join(evidence) if evidence else 'Statistical correlation'
-                    })
-
-        except Exception as e:
-            logging.error(f"Error predicting disease: {e}")
-            return []
-
-        # Sort by confidence
-        predictions.sort(key=lambda x: x['confidence'], reverse=True)
-        return predictions[:20]  # Return top 20
+                logging.error(f"ML prediction error: {e}", exc_info=True)
+                return [{
+                    'disease': 'Prediction Error',
+                    'confidence': 0.0,
+                    'evidence': f'Model error: {str(e)}'
+                }]
+        else:
+            # No model available
+            return [{
+                'disease': 'Model Not Available',
+                'confidence': 0.0,
+                'evidence': 'ML model or label encoder not loaded'
+            }]
 
     def align_sequences(self, seq1, seq2):
         """Perform sequence alignment"""
