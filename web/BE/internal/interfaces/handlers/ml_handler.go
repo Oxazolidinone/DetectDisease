@@ -90,6 +90,19 @@ func (h *MLHandler) ProxyToML(endpoint string) gin.HandlerFunc {
 	}
 }
 
+// CalculateProperties godoc
+// @Summary Calculate protein properties
+// @Description Proxy request to ML service for protein property calculation
+// @Tags ml
+// @Accept json
+// @Produce json
+// @Param request body object true "Sequence for property calculation"
+// @Success 200 {object} object
+// @Router /api/calculate-properties [post]
+func (h *MLHandler) CalculateProperties(c *gin.Context) {
+	h.ProxyToML("/calculate-properties")(c)
+}
+
 // PredictDisease godoc
 // @Summary Predict disease from protein sequence
 // @Description Proxy request to ML service for disease prediction

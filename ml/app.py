@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
-"""
-ML Prediction Service for Protein Disease Prediction
-Loads pre-trained models (Random Forest, XGBoost, LightGBM) and provides REST API endpoints
-"""
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
 import numpy as np
-import os
 from pathlib import Path
 from Bio import Align
-from Bio.Seq import Seq
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
 import logging
 
@@ -305,6 +299,54 @@ def align_sequences():
 
     except Exception as e:
         logging.error(f"Error in align_sequences: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/calculate-properties', methods=['POST'])
+def calculate_properties():
+    """Calculate protein properties using BioPython ProteinAnalysis"""
+    try:
+        data = request.get_json()
+        if not data or 'sequence' not in data:
+            return jsonify({'error': 'Missing sequence parameter'}), 400
+
+        sequence = data['sequence'].strip()
+        if not sequence:
+            return jsonify({'error': 'Empty sequence'}), 400
+
+        # Clean sequence - remove FASTA header if present
+        cleaned_sequence = sequence.replace('\n', '').replace('\r', '').replace(' ', '')
+        if '>' in cleaned_sequence:
+            lines = cleaned_sequence.split('>')
+            cleaned_sequence = ''.join([line.split('\n', 1)[-1] if '\n' in line else line for line in lines if line])
+        cleaned_sequence = cleaned_sequence.upper().strip()
+
+        # Use BioPython ProteinAnalysis
+        try:
+            analyzed_seq = ProteinAnalysis(cleaned_sequence)
+            
+            properties = {
+                'length': len(cleaned_sequence),
+                'molecular_weight': round(analyzed_seq.molecular_weight(), 2),
+                'aromaticity': round(analyzed_seq.aromaticity(), 4),
+                'instability_index': round(analyzed_seq.instability_index(), 2),
+                'isoelectric_point': round(analyzed_seq.isoelectric_point(), 2),
+                'gravy': round(analyzed_seq.gravy(), 4),
+                'secondary_structure_fraction': analyzed_seq.secondary_structure_fraction(),
+            }
+            
+            # Get amino acid composition
+            aa_percent = analyzed_seq.get_amino_acids_percent()
+            properties['amino_acid_percent'] = {k: round(v, 4) for k, v in aa_percent.items()}
+            
+            logging.info(f"Calculated properties for sequence of length {properties['length']}")
+            return jsonify(properties)
+            
+        except Exception as e:
+            logging.error(f"BioPython analysis error: {e}")
+            return jsonify({'error': f'Invalid protein sequence: {str(e)}'}), 400
+
+    except Exception as e:
+        logging.error(f"Error in calculate_properties: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':

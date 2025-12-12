@@ -177,6 +177,8 @@ function showStatus(message, type) {
 /**
  * Initialize character counter
  */
+let calculatePropertiesTimeout = null;
+
 function initializeCharCounter() {
     const sequenceInput = document.getElementById('sequence-input');
     if (sequenceInput) {
@@ -187,11 +189,69 @@ function initializeCharCounter() {
                 charCounter.textContent = text.length + ' characters';
             }
 
-            // Auto-calculate length
+            // Auto-calculate all properties with debouncing
             const cleaned = getCleanedSequence(this.value);
-            const lengthInput = document.getElementById('protein-length');
-            if (lengthInput && cleaned) {
-                lengthInput.value = cleaned.length;
+            
+            // Clear previous timeout
+            if (calculatePropertiesTimeout) {
+                clearTimeout(calculatePropertiesTimeout);
+            }
+            
+            // Only calculate if sequence is long enough (at least 3 amino acids)
+            if (cleaned && cleaned.length >= 3) {
+                // Show loading state
+                const lengthInput = document.getElementById('protein-length');
+                const piInput = document.getElementById('pi-value');
+                const gravyInput = document.getElementById('hydrophobicity');
+                
+                if (lengthInput) lengthInput.value = cleaned.length;
+                
+                // Debounce API call - wait 500ms after user stops typing
+                calculatePropertiesTimeout = setTimeout(async () => {
+                    try {
+                        // Show calculating state
+                        if (piInput) piInput.placeholder = 'Calculating...';
+                        if (gravyInput) gravyInput.placeholder = 'Calculating...';
+                        
+                        // Call API to calculate properties
+                        const properties = await calculateProteinProperties(cleaned);
+                        
+                        // Fill in the calculated values
+                        if (lengthInput) lengthInput.value = properties.length || cleaned.length;
+                        if (piInput) {
+                            piInput.value = properties.isoelectric_point || '';
+                            piInput.placeholder = 'Auto-calculated';
+                        }
+                        if (gravyInput) {
+                            gravyInput.value = properties.gravy || '';
+                            gravyInput.placeholder = 'Auto-calculated';
+                        }
+                        
+                        // Store all properties for later use
+                        sequenceInput.dataset.calculatedProperties = JSON.stringify(properties);
+                        
+                    } catch (error) {
+                        console.error('Failed to calculate properties:', error);
+                        // Reset placeholders on error
+                        if (piInput) piInput.placeholder = 'Auto-calculate (enter sequence)';
+                        if (gravyInput) gravyInput.placeholder = 'Auto-calculate (enter sequence)';
+                    }
+                }, 500); // Wait 500ms after user stops typing
+            } else {
+                // Clear fields if sequence is too short
+                const lengthInput = document.getElementById('protein-length');
+                const piInput = document.getElementById('pi-value');
+                const gravyInput = document.getElementById('hydrophobicity');
+                
+                if (lengthInput) lengthInput.value = cleaned ? cleaned.length : '';
+                if (piInput) {
+                    piInput.value = '';
+                    piInput.placeholder = 'Auto-calculate (enter sequence)';
+                }
+                if (gravyInput) {
+                    gravyInput.value = '';
+                    gravyInput.placeholder = 'Auto-calculate (enter sequence)';
+                }
             }
         });
     }
@@ -300,11 +360,8 @@ async function handlePredictClick() {
             name: proteinName,
             gene: geneName,
             seq: [sequence],
-            // Optional properties
             length: document.getElementById('protein-length')?.value || sequence.length,
-            // mw: parseFloat(document.getElementById('molecular-weight')?.value) || null,
             pi: parseFloat(document.getElementById('pi-value')?.value) || null,
-            // net_charge: parseFloat(document.getElementById('net-charge')?.value) || null,
             hydrophobicity: parseFloat(document.getElementById('hydrophobicity')?.value) || null,
             n_interactors: parseInt(document.getElementById('interactors')?.value) || null,
             taxo: document.getElementById('organism')?.value || '',

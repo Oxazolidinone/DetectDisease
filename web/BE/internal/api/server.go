@@ -20,6 +20,7 @@ func SetUpRoutes(r *gin.Engine, proteinHandler *handlers.ProteinHandler, mlHandl
 		api.POST("/predict", mlHandler.PredictDisease)
 		api.POST("/similarity", mlHandler.CalculateSimilarity)
 		api.POST("/align", mlHandler.AlignSequences)
+		api.POST("/calculate-properties", mlHandler.CalculateProperties)
 		api.GET("/ml/health", mlHandler.HealthCheck)
 	}
 

@@ -145,6 +145,16 @@ async function alignSequences(sequence1, sequence2) {
 }
 
 /**
+ * Calculate protein properties using ML service
+ */
+async function calculateProteinProperties(sequence) {
+    return await mlApiCall('/api/calculate-properties', {
+        method: 'POST',
+        body: JSON.stringify({ sequence })
+    });
+}
+
+/**
  * Create protein in backend
  */
 async function createProtein(proteinData) {
